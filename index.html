@@ -25,7 +25,6 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Estilos do Rastreamento (Timeline) */
         .timeline-container {
             position: relative;
             padding-left: 2rem;
@@ -65,14 +64,14 @@
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800">
 
-    <!-- Menu Lateral (Sidebar) -->
+    <!-- Menu Lateral -->
     <aside class="w-64 bg-slate-900 text-white flex flex-col transition-all duration-300">
         <div class="p-6 flex items-center gap-3 border-b border-slate-700">
             <i class="fa-solid fa-truck-fast text-blue-400 text-2xl"></i>
             <h1 class="text-xl font-bold tracking-wider">ATM<span class="text-blue-400">Log</span></h1>
         </div>
         <nav class="flex-1 px-4 py-6 space-y-2">
-            <button onclick="navigate('dashboard')" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 transition-colors nav-btn" id="nav-dashboard">
+            <button onclick="navigate('dashboard')" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left bg-blue-600/20 text-blue-400 nav-btn" id="nav-dashboard">
                 <i class="fa-solid fa-chart-line w-5"></i>
                 <span>Tabela Principal</span>
             </button>
@@ -84,98 +83,98 @@
                 <i class="fa-solid fa-id-badge w-5"></i>
                 <span>Solicitação Logística</span>
             </button>
-            <button onclick="navigate('rastreamento')" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 transition-colors nav-btn" id="nav-rastreamento">
+            <button onclick="navigate('rastreamento')" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 transition-colors nav-btn" id="nav-rastreamento">
                 <i class="fa-solid fa-location-crosshairs w-5"></i>
                 <span>Rastreio de Entrega</span>
             </button>
         </nav>
         <div class="p-4 border-t border-slate-700 text-sm text-slate-400 text-center">
-            Sistema de Gestão v1.0
+            Sistema de Gestão v1.1
         </div>
     </aside>
 
     <!-- Conteúdo Principal -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50">
         
-        <!-- Cabeçalho (Header) -->
         <header class="bg-white shadow-sm border-b border-gray-200 px-8 py-4 flex justify-between items-center z-10">
-            <h2 id="page-title" class="text-2xl font-semibold text-gray-800">Painel de Controle</h2>
+            <h2 id="page-title" class="text-2xl font-semibold text-gray-800">Painel Principal e Tabela</h2>
             <div class="flex items-center gap-4">
-                <div class="bg-gray-100 p-2 rounded-full text-gray-500">
-                    <i class="fa-solid fa-bell"></i>
-                </div>
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-                        U
-                    </div>
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">U</div>
                     <span class="text-sm font-medium">Usuário</span>
                 </div>
             </div>
         </header>
 
-        <!-- Área de Views -->
         <div class="flex-1 overflow-y-auto p-8 relative">
             
-            <!-- VIEW: DASHBOARD (Tabela Principal) -->
+            <!-- DASHBOARD -->
             <section id="view-dashboard" class="view-section active">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold">Lista de ATMs e CT-es</h3>
+                    <h3 class="text-xl font-bold">Lista de ATMs</h3>
                     <div class="relative">
                         <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" id="search-atm" placeholder="Buscar por ID ou NF..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" onkeyup="filterTable()">
+                        <input type="text" id="search-atm" placeholder="Buscar por ID ou WBS..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg outline-none" onkeyup="filterTable()">
                     </div>
                 </div>
 
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider border-b border-gray-200">
-                                    <th class="p-4 font-medium">ID ATM</th>
-                                    <th class="p-4 font-medium">Pedido</th>
-                                    <th class="p-4 font-medium">Nota Fiscal</th>
-                                    <th class="p-4 font-medium">WBS</th>
-                                    <th class="p-4 font-medium">Coleta / Entrega</th>
-                                    <th class="p-4 font-medium">Status</th>
-                                    <th class="p-4 font-medium text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="atm-table-body" class="divide-y divide-gray-200 text-sm">
-                                <!-- Preenchido via JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider border-b">
+                                <th class="p-4 font-medium">ID ATM</th>
+                                <th class="p-4 font-medium">Pedido</th>
+                                <th class="p-4 font-medium">Nota Fiscal</th>
+                                <th class="p-4 font-medium">Solicitante</th>
+                                <th class="p-4 font-medium">WBS</th>
+                                <th class="p-4 font-medium">Coleta / Entrega</th>
+                                <th class="p-4 font-medium">Tipo de Frete</th>
+                                <th class="p-4 font-medium">Status</th>
+                                <th class="p-4 font-medium text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="atm-table-body" class="divide-y divide-gray-200 text-sm">
+                            <!-- Preenchido via JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
-            <!-- VIEW: FORMULÁRIO DE TRANSPORTE -->
+            <!-- FORMULÁRIO DE TRANSPORTE -->
             <section id="view-novo-transporte" class="view-section max-w-5xl mx-auto">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Formulário de Solicitação de Transporte</h3>
+                    <div class="flex justify-between items-center mb-6 border-b pb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">Solicitação de Transporte</h3>
+                        <div class="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm font-bold border border-blue-200">
+                            Próximo ATM: <span id="display-proximo-atm">#17900</span>
+                        </div>
+                    </div>
                     
                     <form id="form-transporte" onsubmit="handleTransportSubmit(event)">
-                        <!-- Seção 1: Dados Básicos e Faturamento -->
+                        <!-- Seção 1 -->
                         <h4 class="text-lg font-semibold text-blue-600 mt-4 mb-3"><i class="fa-solid fa-user-tag mr-2"></i>Dados do Solicitante e Faturamento</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Solicitante *</label>
-                                <input type="text" required class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                <input type="text" required class="w-full p-2.5 border border-gray-300 rounded-lg outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Data da Solicitação *</label>
-                                <input type="date" required class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" id="input-data-hoje">
+                                <!-- DATA GERADA PELO SISTEMA E BLOQUEADA -->
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Data da Solicitação</label>
+                                <input type="date" id="input-data-hoje" readonly class="w-full p-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed outline-none shadow-inner">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nº do Pedido de Compra</label>
-                                <input type="text" placeholder="Ex: 11325" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                <!-- PEDIDO GERADO PELO SISTEMA E BLOQUEADO -->
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Nº do Pedido (Automático)</label>
+                                <input type="text" id="input-pedido" readonly class="w-full p-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed outline-none font-mono font-bold shadow-inner">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">WBS / Centro de Custo *</label>
-                                <input type="text" required placeholder="Ex: BRBCBBA89" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                <input type="text" required placeholder="Ex: BRBCBBA89" class="w-full p-2.5 border border-gray-300 rounded-lg outline-none">
                             </div>
                         </div>
 
-                        <!-- Seção 2: Rota e Prazos -->
+                        <!-- Seção 2 e 3 (Resto do formulário mantido) -->
                         <h4 class="text-lg font-semibold text-blue-600 mt-6 mb-3"><i class="fa-solid fa-map-location-dot mr-2"></i>Rota e Prazos</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -192,8 +191,7 @@
                             </div>
                         </div>
 
-                        <!-- Seção 3: Carga e Logística -->
-                        <h4 class="text-lg font-semibold text-blue-600 mt-6 mb-3"><i class="fa-solid fa-box-open mr-2"></i>Características da Carga e Veículo</h4>
+                        <h4 class="text-lg font-semibold text-blue-600 mt-6 mb-3"><i class="fa-solid fa-box-open mr-2"></i>Características</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Peso Estimado (kg) *</label>
@@ -210,7 +208,7 @@
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Veículo *</label>
-                                <select required class="w-full p-2.5 border border-gray-300 rounded-lg bg-white">
+                                <select required class="w-full p-2.5 border border-gray-300 rounded-lg">
                                     <option value="">Selecione...</option>
                                     <option value="FIORINO">FIORINO</option>
                                     <option value="VAN">VAN</option>
@@ -224,7 +222,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Frete *</label>
-                                <select required class="w-full p-2.5 border border-gray-300 rounded-lg bg-white">
+                                <select required class="w-full p-2.5 border border-gray-300 rounded-lg">
                                     <option value="">Selecione...</option>
                                     <option value="Dedicado">Dedicado</option>
                                     <option value="Fracionado">Fracionado</option>
@@ -236,10 +234,9 @@
                             </div>
                         </div>
 
-                        <!-- Observações -->
                         <div class="mb-8">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Observações Adicionais</label>
-                            <textarea rows="3" placeholder="Restrições, horários, necessidades especiais..." class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                            <textarea rows="3" class="w-full p-2.5 border border-gray-300 rounded-lg"></textarea>
                         </div>
 
                         <div class="flex justify-end gap-3 border-t pt-4">
@@ -250,356 +247,198 @@
                 </div>
             </section>
 
-            <!-- VIEW: FORMULÁRIO LOGÍSTICA -->
+            <!-- FORMULÁRIO LOGÍSTICA (Oculto na maior parte do tempo) -->
             <section id="view-nova-logistica" class="view-section max-w-2xl mx-auto mt-10">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
                     <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Solicitação Logística Interna</h3>
-                    <p class="text-gray-500 text-sm mb-6">Preencha seus dados institucionais para abertura de solicitação e controle de setor.</p>
-                    
                     <form onsubmit="event.preventDefault(); alert('Solicitação Logística enviada com sucesso!'); navigate('dashboard');">
                         <div class="space-y-4 mb-8">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
-                                <input type="text" required class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Matrícula *</label>
-                                <input type="text" required class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Setor / Departamento *</label>
-                                <input type="text" required class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            </div>
+                            <div><label class="block text-sm">Nome Completo *</label><input type="text" required class="w-full p-2.5 border border-gray-300 rounded-lg"></div>
+                            <div><label class="block text-sm">Matrícula *</label><input type="text" required class="w-full p-2.5 border border-gray-300 rounded-lg"></div>
+                            <div><label class="block text-sm">Setor / Departamento *</label><input type="text" required class="w-full p-2.5 border border-gray-300 rounded-lg"></div>
                         </div>
-                        <div class="flex justify-end">
-                            <button type="submit" class="w-full md:w-auto px-8 py-3 bg-slate-800 text-white font-medium rounded-lg hover:bg-slate-900 transition-colors shadow-sm">Registrar Identificação</button>
-                        </div>
+                        <button type="submit" class="px-8 py-3 bg-slate-800 text-white rounded-lg">Registrar</button>
                     </form>
                 </div>
             </section>
 
-            <!-- VIEW: RASTREAMENTO PARA CLIENTE -->
+            <!-- RASTREAMENTO -->
             <section id="view-rastreamento" class="view-section max-w-3xl mx-auto mt-10">
                 <div class="text-center mb-10">
                     <i class="fa-solid fa-box-open text-5xl text-blue-500 mb-4"></i>
                     <h2 class="text-3xl font-bold text-gray-800">Rastreamento de Carga</h2>
-                    <p class="text-gray-500 mt-2">Acompanhe o status do seu transporte em tempo real.</p>
                 </div>
-
                 <div class="bg-white rounded-xl shadow-md border border-gray-200 p-8 mb-8">
                     <div class="flex gap-3">
-                        <input type="text" id="track-input" placeholder="Digite o ID do ATM ou Nota Fiscal..." class="flex-1 p-4 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-inner">
-                        <button onclick="buscarRastreio()" class="px-8 py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                        <input type="text" id="track-input" placeholder="Digite o ID do ATM..." class="flex-1 p-4 border border-gray-300 rounded-lg text-lg outline-none shadow-inner">
+                        <button onclick="buscarRastreio()" class="px-8 py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 flex items-center gap-2">
                             <i class="fa-solid fa-magnifying-glass"></i> Buscar
                         </button>
                     </div>
                 </div>
-
-                <!-- Resultado do Rastreio (Escondido por padrão) -->
-                <div id="tracking-result" class="hidden bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                <div id="tracking-result" class="hidden bg-white rounded-xl border border-gray-200 p-8">
                     <div class="border-b pb-4 mb-6 flex justify-between items-end">
                         <div>
                             <p class="text-sm text-gray-500 font-medium uppercase tracking-wider">Resultado para:</p>
-                            <h3 class="text-2xl font-bold text-gray-800" id="track-id-display">ATM #17841</h3>
+                            <h3 class="text-2xl font-bold text-gray-800" id="track-id-display">...</h3>
                         </div>
-                        <div class="text-right">
-                            <span class="inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-green-100 text-green-800" id="track-status-badge">Entregue</span>
-                        </div>
+                        <span class="inline-block px-4 py-1.5 rounded-full text-sm font-bold" id="track-status-badge">...</span>
                     </div>
-
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 text-sm">
-                        <div class="bg-gray-50 p-3 rounded border">
-                            <span class="block text-gray-500 mb-1">Origem</span>
-                            <strong class="text-gray-800" id="track-origem">São Paulo, SP</strong>
-                        </div>
-                        <div class="bg-gray-50 p-3 rounded border">
-                            <span class="block text-gray-500 mb-1">Destino</span>
-                            <strong class="text-gray-800" id="track-destino">Betim, MG</strong>
-                        </div>
-                        <div class="bg-gray-50 p-3 rounded border">
-                            <span class="block text-gray-500 mb-1">Previsão</span>
-                            <strong class="text-gray-800" id="track-previsao">19/02/2026</strong>
-                        </div>
-                        <div class="bg-gray-50 p-3 rounded border">
-                            <span class="block text-gray-500 mb-1">Transportadora</span>
-                            <strong class="text-gray-800" id="track-transp">M2000</strong>
-                        </div>
+                        <div class="bg-gray-50 p-3 rounded border"><span class="block text-gray-500 mb-1">Origem (Coleta)</span><strong id="track-origem">...</strong></div>
+                        <div class="bg-gray-50 p-3 rounded border"><span class="block text-gray-500 mb-1">Destino (Entrega)</span><strong id="track-destino">...</strong></div>
+                        <div class="bg-gray-50 p-3 rounded border"><span class="block text-gray-500 mb-1">Previsão</span><strong id="track-previsao">...</strong></div>
+                        <div class="bg-gray-50 p-3 rounded border"><span class="block text-gray-500 mb-1">Transportadora</span><strong id="track-transp">...</strong></div>
                     </div>
-
-                    <!-- Linha do Tempo (Timeline) -->
-                    <div class="timeline-container mt-6" id="timeline-box">
-                        <!-- Gerado via JS dependendo do status -->
-                    </div>
+                    <div class="timeline-container mt-6" id="timeline-box"></div>
                 </div>
-                
-                <!-- Mensagem de erro -->
                 <div id="tracking-error" class="hidden bg-red-50 text-red-600 p-4 rounded-lg text-center border border-red-200">
-                    <i class="fa-solid fa-circle-exclamation mr-2"></i>Nenhum transporte encontrado com este ID ou NF. Verifique a numeração.
+                    ID não encontrado.
                 </div>
             </section>
-
         </div>
     </main>
 
-    <!-- MODAL: FICHA DO ATM MANUAL (A conexão "Ideológica") -->
-    <div id="modal-ficha" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-        <div class="bg-white w-full max-w-4xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col transform scale-95 transition-transform duration-300" id="modal-content">
-            
-            <!-- Cabeçalho do Modal -->
+    <!-- MODAL DETALHES -->
+    <div id="modal-ficha" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden opacity-0 transition-opacity">
+        <div class="bg-white w-full max-w-4xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col" id="modal-content">
             <div class="px-6 py-4 border-b flex justify-between items-center bg-slate-50 rounded-t-xl">
                 <div>
                     <span class="text-xs font-bold text-blue-600 uppercase tracking-widest">Ficha Cadastral Logística</span>
-                    <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        ATM <span id="modal-id">#00000</span>
-                    </h2>
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">ATM <span id="modal-id">#00000</span></h2>
                 </div>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 text-2xl transition-colors">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 text-2xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
-
-            <!-- Corpo do Modal (Scrollável) -->
             <div class="p-6 overflow-y-auto flex-1">
-                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <!-- Bloco: Solicitante -->
                     <div>
                         <h4 class="text-gray-400 text-xs font-bold uppercase mb-2 border-b pb-1">Identificação</h4>
                         <ul class="space-y-2 text-sm">
-                            <li class="flex justify-between"><span class="text-gray-500">Solicitante:</span> <strong class="text-gray-800" id="modal-solicitante">...</strong></li>
-                            <li class="flex justify-between"><span class="text-gray-500">Data Solicitação:</span> <strong class="text-gray-800" id="modal-data-solic">...</strong></li>
-                            <li class="flex justify-between"><span class="text-gray-500">WBS/C. Custo:</span> <strong class="text-gray-800" id="modal-wbs">...</strong></li>
-                            <li class="flex justify-between"><span class="text-gray-500">Pedido:</span> <strong class="text-gray-800" id="modal-pedido">...</strong></li>
-                            <li class="flex justify-between"><span class="text-gray-500">Nota Fiscal:</span> <strong class="text-gray-800" id="modal-nf">...</strong></li>
+                            <li class="flex justify-between"><span class="text-gray-500">Solicitante:</span> <strong id="modal-solicitante">...</strong></li>
+                            <li class="flex justify-between"><span class="text-gray-500">Data Solicitação:</span> <strong id="modal-data-solic">...</strong></li>
+                            <li class="flex justify-between"><span class="text-gray-500">WBS/C. Custo:</span> <strong id="modal-wbs">...</strong></li>
+                            <li class="flex justify-between"><span class="text-gray-500">Pedido:</span> <strong id="modal-pedido">...</strong></li>
+                            <li class="flex justify-between"><span class="text-gray-500">Nota Fiscal:</span> <strong id="modal-nf">...</strong></li>
                         </ul>
                     </div>
-
-                    <!-- Bloco: Rota -->
                     <div>
                         <h4 class="text-gray-400 text-xs font-bold uppercase mb-2 border-b pb-1">Rotas e Prazos</h4>
                         <ul class="space-y-2 text-sm">
-                            <li class="flex flex-col mb-2">
-                                <span class="text-gray-500 text-xs"><i class="fa-solid fa-location-arrow text-blue-500 mr-1"></i>Coleta:</span> 
-                                <strong class="text-gray-800 mt-1" id="modal-coleta">...</strong>
-                            </li>
-                            <li class="flex flex-col">
-                                <span class="text-gray-500 text-xs"><i class="fa-solid fa-flag-checkered text-green-500 mr-1"></i>Entrega:</span> 
-                                <strong class="text-gray-800 mt-1" id="modal-entrega">...</strong>
-                            </li>
+                            <li class="flex flex-col mb-2"><span class="text-gray-500 text-xs">Coleta:</span> <strong id="modal-coleta">...</strong></li>
+                            <li class="flex flex-col"><span class="text-gray-500 text-xs">Entrega:</span> <strong id="modal-entrega">...</strong></li>
                         </ul>
                     </div>
-
-                    <!-- Bloco: Especificações -->
                     <div>
                         <h4 class="text-gray-400 text-xs font-bold uppercase mb-2 border-b pb-1">Especificações da Carga</h4>
                         <ul class="space-y-2 text-sm">
-                            <li class="flex justify-between"><span class="text-gray-500">Peso Total:</span> <strong class="text-gray-800" id="modal-peso">...</strong></li>
-                            <li class="flex justify-between"><span class="text-gray-500">Volume Total:</span> <strong class="text-gray-800" id="modal-volume">...</strong></li>
-                            <li class="flex justify-between"><span class="text-gray-500">Medidas (CxLxA):</span> <strong class="text-gray-800" id="modal-medidas">...</strong></li>
+                            <li class="flex justify-between"><span class="text-gray-500">Peso Total:</span> <strong id="modal-peso">...</strong></li>
+                            <li class="flex justify-between"><span class="text-gray-500">Volume Total:</span> <strong id="modal-volume">...</strong></li>
+                            <li class="flex justify-between"><span class="text-gray-500">Medidas:</span> <strong id="modal-medidas">...</strong></li>
                         </ul>
                     </div>
-
-                    <!-- Bloco: Logística -->
                     <div>
                         <h4 class="text-gray-400 text-xs font-bold uppercase mb-2 border-b pb-1">Dados Operacionais</h4>
                         <ul class="space-y-2 text-sm">
-                            <li class="flex justify-between"><span class="text-gray-500">Veículo Requisitado:</span> <strong class="text-gray-800" id="modal-veiculo">...</strong></li>
-                            <li class="flex justify-between"><span class="text-gray-500">Tipo de Frete:</span> <strong class="text-gray-800" id="modal-frete">...</strong></li>
-                            <li class="flex justify-between items-center"><span class="text-gray-500">Status Atual:</span> 
-                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-bold" id="modal-status">...</span>
-                            </li>
+                            <li class="flex justify-between"><span class="text-gray-500">Veículo:</span> <strong id="modal-veiculo">...</strong></li>
+                            <li class="flex justify-between"><span class="text-gray-500">Tipo de Frete:</span> <strong id="modal-frete">...</strong></li>
+                            <li class="flex justify-between items-center"><span class="text-gray-500">Status:</span> <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-bold" id="modal-status">...</span></li>
                         </ul>
                     </div>
                 </div>
-
-                <div class="mt-6">
-                    <h4 class="text-gray-400 text-xs font-bold uppercase mb-2 border-b pb-1">Observações</h4>
-                    <div class="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-sm italic border border-yellow-200" id="modal-obs">
-                        Nenhuma observação informada.
-                    </div>
-                </div>
-
             </div>
-            
-            <!-- Rodapé Modal -->
             <div class="p-4 border-t bg-gray-50 rounded-b-xl flex justify-end">
-                <button onclick="closeModal()" class="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors">Fechar Detalhes</button>
+                <button onclick="closeModal()" class="px-6 py-2 bg-gray-800 text-white rounded-lg">Fechar Detalhes</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 1. BANCO DE DADOS SIMULADO (Baseado nos seus Excels)
+        // CONTADORES DO SISTEMA (Baseados na planilha real, começamos de um número base)
+        let proximoIDATM = 17900;
+        let proximoPedido = 45092;
+
+        // BANCO DE DADOS INICIAL
         let dbATMs = [
-            {
-                id: "1632664", solicitante: "Cliente Padrão", dataSolicitacao: "15/03/2024", pedido: "11325", nf: "N/A", wbs: "BRBCBBA89",
-                localColeta: "Comau Santo André, SP", localEntrega: "ZF, Limeira, SP", dataColeta: "15/03/2024", dataEntrega: "16/03/2024",
-                peso: "10 kg", volume: "1 m³", medidas: "N/D", veiculo: "Fiorino", frete: "Dedicado", 
-                transportadora: "M2000", status: "Em Trânsito", obs: "Cotação"
-            },
-            {
-                id: "17841", solicitante: "Douglas Felipe", dataSolicitacao: "19/02/2026", pedido: "N/A", nf: "N/A", wbs: "BRBCBBB29",
-                localColeta: "TEC LABEL, São Paulo, SP", localEntrega: "COMAU - BETIM, MG", dataColeta: "19/02/2026", dataEntrega: "21/02/2026",
-                peso: "0.67 kg", volume: "1 m³", medidas: "Caixa pequena", veiculo: "Van", frete: "Fracionado", 
-                transportadora: "M2000", status: "Entregue", obs: "ATM UTILIZADA"
-            },
-            {
-                id: "17842", solicitante: "Tatiane", dataSolicitacao: "19/02/2026", pedido: "32619", nf: "32619", wbs: "BRBCBBB21",
-                localColeta: "METALMAG, São Paulo, SP", localEntrega: "COMAU - BETIM, MG", dataColeta: "19/02/2026", dataEntrega: "22/02/2026",
-                peso: "1 kg", volume: "1 m³", medidas: "N/D", veiculo: "Veículo fracionado", frete: "Fracionado", 
-                transportadora: "M2000", status: "Entregue", obs: "ATM UTILIZADA"
-            },
-            {
-                id: "10200", solicitante: "Compras", dataSolicitacao: "17/11/2022", pedido: "N/A", nf: "N/A", wbs: "BRBCBBB00",
-                localColeta: "Euchner, São Paulo, SP", localEntrega: "Comau Santo André, SP", dataColeta: "17/11/2022", dataEntrega: "18/11/2022",
-                peso: "3 kg", volume: "45 m³", medidas: "N/D", veiculo: "Veículo Fracionado", frete: "Fracionado", 
-                transportadora: "M2000", status: "Entregue", obs: "Nenhuma"
-            },
-            {
-                id: "17899", solicitante: "Engenharia", dataSolicitacao: "26/02/2026", pedido: "45091", nf: "90021", wbs: "BRBCBBA51",
-                localColeta: "FCA, Goiana, PE", localEntrega: "Betim, MG", dataColeta: "27/02/2026", dataEntrega: "05/03/2026",
-                peso: "12000 kg", volume: "40 m³", medidas: "12x2.5x2.8", veiculo: "TRUCK", frete: "Dedicado", 
-                transportadora: "Transcourier", status: "Aguardando Aprovação", obs: "Carga pesada. Necessário guindaste."
-            }
+            { id: "17899", solicitante: "Engenharia", dataSolicitacao: "2026-02-26", pedido: "45091", nf: "90021", wbs: "BRBCBBA51", localColeta: "FCA, Goiana, PE", localEntrega: "Betim, MG", dataColeta: "2026-02-27", dataEntrega: "2026-03-05", peso: "12000 kg", volume: "40 m³", medidas: "12x2.5x2.8", veiculo: "TRUCK", frete: "Dedicado", transportadora: "Transcourier", status: "Aguardando Aprovação", obs: "Carga pesada." },
+            { id: "17841", solicitante: "Douglas Felipe", dataSolicitacao: "2026-02-19", pedido: "45088", nf: "N/A", wbs: "BRBCBBB29", localColeta: "TEC LABEL, São Paulo, SP", localEntrega: "COMAU - BETIM, MG", dataColeta: "2026-02-19", dataEntrega: "2026-02-21", peso: "0.67 kg", volume: "1 m³", medidas: "Caixa pequena", veiculo: "Van", frete: "Fracionado", transportadora: "M2000", status: "Entregue", obs: "" }
         ];
 
-        // 2. LÓGICA DE NAVEGAÇÃO ENTRE TELAS
+        // Navegação de Telas
         function navigate(viewId) {
-            // Esconde todas as views
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            // Remove destaque dos botões do menu
-            document.querySelectorAll('.nav-btn').forEach(el => {
-                el.classList.remove('bg-blue-600/20', 'text-blue-400', 'border-l-4', 'border-blue-500');
-            });
-
-            // Mostra a view correta
-            document.getElementById(`view-${viewId}`).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-blue-600/20', 'text-blue-400'));
             
-            // Destaca menu (se não for form oculto)
+            document.getElementById(`view-${viewId}`).classList.add('active');
             const navBtn = document.getElementById(`nav-${viewId}`);
-            if(navBtn) {
-                navBtn.classList.add('bg-blue-600/20', 'text-blue-400');
-            }
+            if(navBtn) navBtn.classList.add('bg-blue-600/20', 'text-blue-400');
 
-            // Muda o título da página
-            const titles = {
-                'dashboard': 'Painel Principal e Tabela',
-                'novo-transporte': 'Nova Solicitação de Transporte',
-                'nova-logistica': 'Identificação Logística',
-                'rastreamento': 'Rastreamento para Clientes'
-            };
-            document.getElementById('page-title').innerText = titles[viewId] || 'Sistema ATM';
+            // PREENCHIMENTO AUTOMÁTICO SE FOR A TELA DE NOVO TRANSPORTE
+            if(viewId === 'novo-transporte') {
+                // 1. Data do sistema preenchida e bloqueada
+                const hoje = new Date();
+                // Ajuste de timezone para exibir formato AAAA-MM-DD correto
+                document.getElementById('input-data-hoje').valueAsDate = new Date(hoje.getTime() - hoje.getTimezoneOffset() * 60000);
+                
+                // 2. Número de pedido crescente gerado automaticamente
+                document.getElementById('input-pedido').value = proximoPedido;
+                
+                // 3. Mostra qual será o ID ATM na UI
+                document.getElementById('display-proximo-atm').innerText = `#${proximoIDATM}`;
+            }
 
             if(viewId === 'dashboard') renderTable();
         }
 
-        // 3. RENDERIZAR TABELA PRINCIPAL
         function renderTable(data = dbATMs) {
             const tbody = document.getElementById('atm-table-body');
             tbody.innerHTML = '';
-
             data.forEach(atm => {
                 let statusColor = 'bg-gray-100 text-gray-800';
                 if(atm.status === 'Entregue') statusColor = 'bg-green-100 text-green-800';
                 if(atm.status === 'Em Trânsito') statusColor = 'bg-blue-100 text-blue-800';
-                if(atm.status === 'Cancelado') statusColor = 'bg-red-100 text-red-800';
                 if(atm.status === 'Aguardando Aprovação') statusColor = 'bg-yellow-100 text-yellow-800';
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-blue-50/50 transition-colors border-b border-gray-100">
+                    <tr class="hover:bg-blue-50/50 border-b border-gray-100">
                         <td class="p-4 font-bold text-gray-800">#${atm.id}</td>
-                        <td class="p-4">${atm.pedido}</td>
+                        <td class="p-4 font-mono">${atm.pedido}</td>
                         <td class="p-4">${atm.nf}</td>
+                        <td class="p-4 text-slate-700">${atm.solicitante}</td>
                         <td class="p-4 font-medium text-slate-600">${atm.wbs}</td>
                         <td class="p-4">
-                            <div class="text-xs"><i class="fa-solid fa-arrow-up text-blue-400 w-4"></i> ${atm.localColeta.split(',')[0]}</div>
-                            <div class="text-xs"><i class="fa-solid fa-arrow-down text-green-400 w-4"></i> ${atm.localEntrega.split(',')[0]}</div>
+                            <div class="text-xs text-gray-500">De: <span class="text-gray-800">${atm.localColeta.split(',')[0]}</span></div>
+                            <div class="text-xs text-gray-500">Para: <span class="text-gray-800">${atm.localEntrega.split(',')[0]}</span></div>
                         </td>
-                        <td class="p-4">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold ${statusColor}">${atm.status}</span>
-                        </td>
+                        <td class="p-4 text-slate-600">${atm.frete}</td>
+                        <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${statusColor}">${atm.status}</span></td>
                         <td class="p-4 text-center">
-                            <button onclick="openModal('${atm.id}')" class="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded text-sm font-medium transition-colors">
-                                <i class="fa-solid fa-folder-open mr-1"></i> Ficha Completa
-                            </button>
+                            <button onclick="openModal('${atm.id}')" class="text-blue-600 bg-blue-50 px-3 py-1 rounded text-sm font-medium hover:bg-blue-100">Ficha Completa</button>
                         </td>
                     </tr>
                 `;
             });
         }
 
-        // Busca na tabela
         function filterTable() {
             const term = document.getElementById('search-atm').value.toLowerCase();
-            const filtered = dbATMs.filter(atm => 
-                atm.id.toLowerCase().includes(term) || 
-                atm.nf.toLowerCase().includes(term) ||
-                atm.wbs.toLowerCase().includes(term) ||
-                atm.pedido.toLowerCase().includes(term)
-            );
-            renderTable(filtered);
+            renderTable(dbATMs.filter(atm => atm.id.includes(term) || atm.wbs.toLowerCase().includes(term) || atm.pedido.includes(term)));
         }
 
-        // 4. LÓGICA DO MODAL (Ficha do ATM - "Segunda Planilha")
-        function openModal(id) {
-            const atm = dbATMs.find(a => a.id === id);
-            if(!atm) return;
-
-            // Preenche dados
-            document.getElementById('modal-id').innerText = `#${atm.id}`;
-            document.getElementById('modal-solicitante').innerText = atm.solicitante;
-            document.getElementById('modal-data-solic').innerText = atm.dataSolicitacao;
-            document.getElementById('modal-wbs').innerText = atm.wbs;
-            document.getElementById('modal-pedido').innerText = atm.pedido;
-            document.getElementById('modal-nf').innerText = atm.nf;
-            
-            document.getElementById('modal-coleta').innerText = `${atm.localColeta} (Desejado: ${atm.dataColeta})`;
-            document.getElementById('modal-entrega').innerText = `${atm.localEntrega} (Desejado: ${atm.dataEntrega})`;
-            
-            document.getElementById('modal-peso').innerText = atm.peso;
-            document.getElementById('modal-volume').innerText = atm.volume;
-            document.getElementById('modal-medidas').innerText = atm.medidas;
-            
-            document.getElementById('modal-veiculo').innerText = atm.veiculo;
-            document.getElementById('modal-frete').innerText = atm.frete;
-            document.getElementById('modal-status').innerText = atm.status;
-            
-            document.getElementById('modal-obs').innerText = atm.obs || 'Nenhuma observação.';
-
-            // Mostra Modal com animação
-            const modal = document.getElementById('modal-ficha');
-            const content = document.getElementById('modal-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-            }, 10);
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('modal-ficha');
-            const content = document.getElementById('modal-content');
-            modal.classList.add('opacity-0');
-            content.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        // 5. SUBMIT FORMULÁRIO TRANSPORTE
+        // SALVAR NOVO FORMULÁRIO
         function handleTransportSubmit(e) {
             e.preventDefault();
             const inputs = e.target.querySelectorAll('input, select, textarea');
             
-            // Simula ID auto-incremento
-            const novoId = Math.floor(Math.random() * 90000) + 10000;
-            
-            // Cria novo objeto
+            // Pega os valores que foram gerados automaticamente pelo sistema
+            const dataGerada = document.getElementById('input-data-hoje').value;
+            const pedidoGerado = document.getElementById('input-pedido').value;
+            const idGerado = proximoIDATM.toString();
+
             const novoATM = {
-                id: novoId.toString(),
+                id: idGerado,
                 solicitante: inputs[0].value,
-                dataSolicitacao: inputs[1].value,
-                pedido: inputs[2].value || 'N/A',
+                dataSolicitacao: dataGerada, // Valor automático 
+                pedido: pedidoGerado,        // Valor automático 
                 wbs: inputs[3].value,
                 localColeta: inputs[4].value,
                 dataColeta: inputs[5].value,
@@ -616,96 +455,77 @@
                 status: 'Aguardando Aprovação'
             };
 
-            dbATMs.unshift(novoATM); // Adiciona no topo
-            alert(`Sucesso! ATM #${novoId} gerado e incluído na planilha principal.`);
-            e.target.reset(); // Limpa form
-            document.getElementById('input-data-hoje').valueAsDate = new Date();
+            dbATMs.unshift(novoATM); // Salva no topo da lista
+            
+            alert(`Sucesso! ATM #${idGerado} e Pedido ${pedidoGerado} registrados.`);
+            
+            // INCREMENTA OS CONTADORES DO SISTEMA PARA A PRÓXIMA VEZ!
+            proximoIDATM++;
+            proximoPedido++;
+
+            e.target.reset(); // Limpa campos digitáveis
             navigate('dashboard');
         }
 
-        // 6. RASTREAMENTO (Acompanhamento Cliente)
+        function openModal(id) {
+            const atm = dbATMs.find(a => a.id === id);
+            document.getElementById('modal-id').innerText = `#${atm.id}`;
+            document.getElementById('modal-solicitante').innerText = atm.solicitante;
+            document.getElementById('modal-data-solic').innerText = atm.dataSolicitacao;
+            document.getElementById('modal-wbs').innerText = atm.wbs;
+            document.getElementById('modal-pedido').innerText = atm.pedido;
+            document.getElementById('modal-nf').innerText = atm.nf;
+            document.getElementById('modal-coleta').innerText = `${atm.localColeta} (${atm.dataColeta})`;
+            document.getElementById('modal-entrega').innerText = `${atm.localEntrega} (${atm.dataEntrega})`;
+            document.getElementById('modal-peso').innerText = atm.peso;
+            document.getElementById('modal-volume').innerText = atm.volume;
+            document.getElementById('modal-medidas').innerText = atm.medidas;
+            document.getElementById('modal-veiculo').innerText = atm.veiculo;
+            document.getElementById('modal-frete').innerText = atm.frete;
+            document.getElementById('modal-status').innerText = atm.status;
+
+            const modal = document.getElementById('modal-ficha');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal-ficha');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
         function buscarRastreio() {
-            const termo = document.getElementById('track-input').value.trim().toLowerCase();
-            const resultBox = document.getElementById('tracking-result');
-            const errorBox = document.getElementById('tracking-error');
-            const timelineBox = document.getElementById('timeline-box');
-            
-            if(!termo) return;
-
-            // Busca por ID ou NF
-            const atm = dbATMs.find(a => a.id.toLowerCase() === termo || (a.nf !== 'N/A' && a.nf.toLowerCase() === termo));
-
+            const termo = document.getElementById('track-input').value.trim();
+            const atm = dbATMs.find(a => a.id === termo);
             if(atm) {
-                errorBox.classList.add('hidden');
-                resultBox.classList.remove('hidden');
-                
-                // Preenche cards topo
-                document.getElementById('track-id-display').innerText = `ATM #${atm.id} / NF: ${atm.nf}`;
-                document.getElementById('track-origem').innerText = atm.localColeta;
-                document.getElementById('track-destino').innerText = atm.localEntrega;
+                document.getElementById('tracking-error').classList.add('hidden');
+                document.getElementById('tracking-result').classList.remove('hidden');
+                document.getElementById('track-id-display').innerText = `ATM #${atm.id} / Pedido: ${atm.pedido}`;
+                document.getElementById('track-origem').innerText = atm.localColeta.split(',')[0];
+                document.getElementById('track-destino').innerText = atm.localEntrega.split(',')[0];
                 document.getElementById('track-previsao').innerText = atm.dataEntrega;
                 document.getElementById('track-transp').innerText = atm.transportadora;
-
-                // Cor do Badge e Status da Timeline
+                
                 const badge = document.getElementById('track-status-badge');
                 badge.innerText = atm.status;
-                
-                let stepSol = '', stepApr = '', stepCol = '', stepTra = '', stepEnt = '';
-                
-                // Lógica de cores da Timeline simulando status real da transportadora
-                if(atm.status === 'Aguardando Aprovação') {
-                    badge.className = 'inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-yellow-100 text-yellow-800';
-                    stepSol = 'completed'; stepApr = 'active';
-                } else if(atm.status === 'Pendente' || atm.status === 'Agendado') {
-                    badge.className = 'inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-purple-100 text-purple-800';
-                    stepSol = 'completed'; stepApr = 'completed'; stepCol = 'active';
-                } else if(atm.status === 'Em Trânsito') {
-                    badge.className = 'inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-blue-100 text-blue-800';
-                    stepSol = 'completed'; stepApr = 'completed'; stepCol = 'completed'; stepTra = 'active';
-                } else if(atm.status === 'Entregue') {
-                    badge.className = 'inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-green-100 text-green-800';
-                    stepSol = 'completed'; stepApr = 'completed'; stepCol = 'completed'; stepTra = 'completed'; stepEnt = 'completed';
-                } else if(atm.status === 'Cancelado') {
-                    badge.className = 'inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-red-100 text-red-800';
-                    stepSol = 'completed';
-                }
+                let stepCol = '', stepTra = '', stepEnt = '';
+                if(atm.status === 'Aguardando Aprovação') badge.className = 'inline-block px-4 py-1.5 rounded-full text-sm bg-yellow-100 text-yellow-800';
+                else if(atm.status === 'Em Trânsito') { badge.className = 'inline-block px-4 py-1.5 rounded-full text-sm bg-blue-100 text-blue-800'; stepCol = 'completed'; stepTra = 'active'; }
+                else if(atm.status === 'Entregue') { badge.className = 'inline-block px-4 py-1.5 rounded-full text-sm bg-green-100 text-green-800'; stepCol = 'completed'; stepTra = 'completed'; stepEnt = 'completed'; }
 
-                // Monta a timeline visual
-                timelineBox.innerHTML = `
-                    <div class="timeline-step ${stepSol}">
-                        <h4 class="font-bold text-gray-800">Solicitação Realizada</h4>
-                        <p class="text-sm text-gray-500">${atm.dataSolicitacao} - Registrado no sistema por ${atm.solicitante}</p>
-                    </div>
-                    <div class="timeline-step ${stepApr}">
-                        <h4 class="font-bold text-gray-800">Aprovação / Cotação de Frete</h4>
-                        <p class="text-sm text-gray-500">Definição de transportadora e custos (WBS: ${atm.wbs})</p>
-                    </div>
-                    <div class="timeline-step ${stepCol}">
-                        <h4 class="font-bold text-gray-800">Coleta Realizada</h4>
-                        <p class="text-sm text-gray-500">Retirado em: ${atm.localColeta}</p>
-                    </div>
-                    <div class="timeline-step ${stepTra}">
-                        <h4 class="font-bold text-gray-800">Em Trânsito</h4>
-                        <p class="text-sm text-gray-500">Mercadoria a caminho do destino via ${atm.veiculo} (${atm.frete})</p>
-                    </div>
-                    <div class="timeline-step ${stepEnt}">
-                        <h4 class="font-bold text-gray-800">Entregue</h4>
-                        <p class="text-sm text-gray-500">Mercadoria recebida em: ${atm.localEntrega}</p>
-                    </div>
-                `;
-
+                document.getElementById('timeline-box').innerHTML = `
+                    <div class="timeline-step completed"><h4 class="font-bold">Solicitação Realizada</h4><p class="text-sm text-gray-500">${atm.dataSolicitacao}</p></div>
+                    <div class="timeline-step ${stepCol}"><h4 class="font-bold">Coleta no Fornecedor</h4><p class="text-sm text-gray-500">${atm.localColeta}</p></div>
+                    <div class="timeline-step ${stepTra}"><h4 class="font-bold">Em Trânsito</h4><p class="text-sm text-gray-500">${atm.veiculo}</p></div>
+                    <div class="timeline-step ${stepEnt}"><h4 class="font-bold">Entregue</h4><p class="text-sm text-gray-500">${atm.localEntrega}</p></div>`;
             } else {
-                resultBox.classList.add('hidden');
-                errorBox.classList.remove('hidden');
+                document.getElementById('tracking-result').classList.add('hidden');
+                document.getElementById('tracking-error').classList.remove('hidden');
             }
         }
 
-        // Init
-        document.addEventListener('DOMContentLoaded', () => {
-            renderTable();
-            document.getElementById('input-data-hoje').valueAsDate = new Date();
-        });
-
+        document.addEventListener('DOMContentLoaded', () => { renderTable(); });
     </script>
 </body>
 </html>
