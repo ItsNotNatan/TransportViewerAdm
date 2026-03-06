@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './home.css';
 
 // --- Ícones SVG embutidos ---
@@ -17,19 +17,59 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAtm, setSelectedAtm] = useState(null);
+  
+  // ESTADOS PARA OS DADOS DO BANCO
+  const [atms, setAtms] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erroTela, setErroTela] = useState(null); // NOVO: Guarda o erro para mostrar na tela
 
-  const mockATMs = [
-    { id: '17900', pedido: '45092', nf: '90021', solicitante: 'João Silva', wbs: 'BRBCBBA51', dataSolicitacao: '03/03/2026', coleta: 'FCA, Goiana', entrega: 'Betim, MG', peso: '12000 kg', volume: '40 m³', veiculo: 'TRUCK', frete: 'Dedicado', status: 'Em Trânsito' },
-    { id: '17899', pedido: '45091', nf: '90020', solicitante: 'Maria Souza', wbs: 'BRBCBBA89', dataSolicitacao: '02/03/2026', coleta: 'São Paulo, SP', entrega: 'Campinas, SP', peso: '500 kg', volume: '2 m³', veiculo: 'VAN', frete: 'Fracionado', status: 'Aguardando Aprovação' },
-    { id: '17898', pedido: '45090', nf: '90019', solicitante: 'Carlos Lima', wbs: 'BRBCBBA12', dataSolicitacao: '01/03/2026', coleta: 'Curitiba, PR', entrega: 'Joinville, SC', peso: '25000 kg', volume: '80 m³', veiculo: 'CARRETA', frete: 'Dedicado', status: 'Entregue' },
-  ];
+  // BUSCA OS DADOS NO BACK-END QUANDO A TELA ABRE
+  useEffect(() => {
+    if (activeTab === 'dashboard') {
+      buscarPedidos();
+    }
+  }, [activeTab]);
+
+  const buscarPedidos = async () => {
+    setCarregando(true);
+    setErroTela(null); // Limpa o erro antes de tentar
+    try {
+      // ATENÇÃO AQUI: Mudámos a porta para 3001!
+      const resposta = await fetch('http://localhost:3001/api/admin/transportes');
+      const dados = await resposta.json();
+      
+      if (resposta.ok) {
+        setAtms(dados);
+      } else {
+        setErroTela("ERRO DO SERVIDOR: " + JSON.stringify(dados));
+      }
+    } catch (erro) {
+      setErroTela("ERRO DE CONEXÃO: O servidor Node.js está rodando na porta 3001? Detalhe: " + erro.message);
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  // SISTEMA DE BUSCA (FILTRO)
+  const atmsFiltrados = atms.filter(atm => {
+    const termo = searchTerm.toLowerCase();
+    return (
+      (atm.pedido_compra && atm.pedido_compra.toLowerCase().includes(termo)) ||
+      (atm.nf && atm.nf.toLowerCase().includes(termo)) ||
+      (atm.wbs && atm.wbs.toLowerCase().includes(termo)) ||
+      (atm.id && atm.id.toLowerCase().includes(termo))
+    );
+  });
 
   const getStatusClass = (status) => {
     if (status === 'Entregue') return 'badge-success';
-    if (status === 'Em Trânsito') return 'badge-info';
+    if (status === 'Em Trânsito' || status === 'Aprovado') return 'badge-info';
     if (status === 'Aguardando Aprovação') return 'badge-warning';
     return 'badge-default';
   };
+
+  // Encurta o ID (UUID) para mostrar na tela sem quebrar o layout
+  const shortId = (id) => id ? id.substring(0, 8).toUpperCase() : '';
 
   return (
     <div className="home-layout">
@@ -95,6 +135,13 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* MENSAGEM DE ERRO NA TELA (MUITO IMPORTANTE) */}
+              {erroTela && (
+                <div style={{ padding: '1rem', backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #ef4444', borderRadius: '8px', marginBottom: '1rem' }}>
+                  <strong>Atenção:</strong> {erroTela}
+                </div>
+              )}
+
               <div className="table-container">
                 <table className="data-table">
                   <thead>
@@ -103,18 +150,32 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {mockATMs.map((atm) => (
-                      <tr key={atm.id}>
-                        <td className="font-bold">#{atm.id}</td><td className="font-mono">{atm.pedido}</td><td>{atm.nf}</td><td className="text-muted">{atm.solicitante}</td><td className="font-medium">{atm.wbs}</td>
-                        <td><div className="route-info">De: <span>{atm.coleta}</span></div><div className="route-info">Para: <span>{atm.entrega}</span></div></td>
-                        <td className="text-muted">{atm.frete}</td><td><span className={`badge ${getStatusClass(atm.status)}`}>{atm.status}</span></td>
-                        <td className="text-center">
-                          <button className="btn-action" onClick={() => setSelectedAtm(atm)}>
-                            <FolderOpen size={16} /> Abrir
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {carregando ? (
+                      <tr><td colSpan="9" className="text-center" style={{padding: '2rem'}}>Carregando pedidos...</td></tr>
+                    ) : atmsFiltrados.length === 0 ? (
+                      <tr><td colSpan="9" className="text-center" style={{padding: '2rem'}}>Nenhum pedido encontrado. (Tente criar um novo no formulário do cliente!)</td></tr>
+                    ) : (
+                      atmsFiltrados.map((atm) => (
+                        <tr key={atm.id}>
+                          <td className="font-bold" title={atm.id}>#{shortId(atm.id)}</td>
+                          <td className="font-mono">{atm.pedido_compra || '-'}</td>
+                          <td>{atm.nf || '-'}</td>
+                          <td className="text-muted">{atm.solicitacao}</td>
+                          <td className="font-medium">{atm.wbs || '-'}</td>
+                          <td>
+                            <div className="route-info">De: <span>{atm.origem?.municipio} - {atm.origem?.uf}</span></div>
+                            <div className="route-info">Para: <span>{atm.destino?.municipio} - {atm.destino?.uf}</span></div>
+                          </td>
+                          <td className="text-muted">{atm.tipo_frete}</td>
+                          <td><span className={`badge ${getStatusClass(atm.status)}`}>{atm.status}</span></td>
+                          <td className="text-center">
+                            <button className="btn-action" onClick={() => setSelectedAtm(atm)}>
+                              <FolderOpen size={16} /> Abrir
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -155,7 +216,7 @@ export default function Home() {
             <div className="modal-header">
               <div>
                 <span className="modal-subtitle">Ficha Cadastral Logística</span>
-                <h2 className="modal-title">ATM #{selectedAtm.id}</h2>
+                <h2 className="modal-title">ATM #{shortId(selectedAtm.id)}</h2>
               </div>
               <button className="btn-close" onClick={() => setSelectedAtm(null)}><X size={24} /></button>
             </div>
@@ -164,15 +225,17 @@ export default function Home() {
                 <div className="modal-section">
                   <h4>Identificação</h4>
                   <ul>
-                    <li><span>Solicitante:</span> <strong>{selectedAtm.solicitante}</strong></li>
-                    <li><span>Pedido:</span> <strong>{selectedAtm.pedido}</strong></li>
-                    <li><span>Nota Fiscal:</span> <strong>{selectedAtm.nf}</strong></li>
+                    <li><span>Solicitante:</span> <strong>{selectedAtm.solicitacao}</strong></li>
+                    <li><span>Pedido:</span> <strong>{selectedAtm.pedido_compra || 'N/A'}</strong></li>
+                    <li><span>Nota Fiscal:</span> <strong>{selectedAtm.nf || 'N/A'}</strong></li>
+                    <li><span>WBS:</span> <strong>{selectedAtm.wbs || 'N/A'}</strong></li>
                   </ul>
                 </div>
                 <div className="modal-section">
                   <h4>Carga e Veículo</h4>
                   <ul>
-                    <li><span>Peso:</span> <strong>{selectedAtm.peso}</strong></li>
+                    <li><span>Peso:</span> <strong>{selectedAtm.peso} kg</strong></li>
+                    <li><span>Volume:</span> <strong>{selectedAtm.volume} m³</strong></li>
                     <li><span>Veículo:</span> <strong>{selectedAtm.veiculo}</strong></li>
                     <li><span>Status:</span> <span className={`badge ${getStatusClass(selectedAtm.status)}`}>{selectedAtm.status}</span></li>
                   </ul>
