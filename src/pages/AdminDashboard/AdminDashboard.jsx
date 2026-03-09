@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { jsPDF } from "jspdf"; // IMPORTAÇÃO OBRIGATÓRIA PARA O PDF
+import { jsPDF } from "jspdf"; 
 
 // --- Ícones SVG embutidos ---
 const Search = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>;
@@ -31,11 +31,8 @@ export default function AdminDashboard() {
     }
   };
 
-  // ========================================================
-  // FILTRO BLINDADO - MOSTRA TUDO SE ESTIVER VAZIO!
-  // ========================================================
   const atmsFiltrados = atms.filter(atm => {
-    if (!searchTerm) return true; // Se não digitou nada, mostra todos!
+    if (!searchTerm) return true; 
 
     const termo = searchTerm.toLowerCase();
     return (
@@ -61,14 +58,18 @@ export default function AdminDashboard() {
     return dataStr;
   };
 
+  const formatarValor = (valor) => {
+    if (!valor || isNaN(valor)) return 'Sob Consulta';
+    return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
+
   // ========================================================
-  // FUNÇÃO QUE GERA O PDF EXATAMENTE IGUAL AO SEU MODELO
+  // GERADOR DE PDF 
   // ========================================================
   const gerarPDF = (atm) => {
     const doc = new jsPDF();
     let y = 20;
 
-    // --- CABEÇALHO ---
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.text("ATM - AUTORIZAÇÃO DE TRANSPORTE DE MERCADORIA", 105, y, { align: "center" });
@@ -82,14 +83,13 @@ export default function AdminDashboard() {
     doc.text(`N° ATM: ${shortId(atm.id)}`, 105, y, { align: "center" });
     y += 10;
 
-    // Função de ajuda para desenhar linhas de dados robustas
     const addRow = (label1, val1, label2 = "", val2 = "") => {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
       doc.text(label1, 20, y);
       
       doc.setFont("helvetica", "normal");
-      doc.text(val1 ? String(val1) : "Não informado", 65, y); // Margem alinhada
+      doc.text(val1 ? String(val1) : "Não informado", 65, y); 
       
       if (label2) {
         doc.setFont("helvetica", "bold");
@@ -108,13 +108,11 @@ export default function AdminDashboard() {
       y += 8;
     };
 
-    // --- 1. IDENTIFICAÇÃO ---
     addSectionTitle("1. IDENTIFICAÇÃO");
     addRow("Solicitante:", atm.solicitacao, "Data da Solicitação:", formatarData(atm.data_solicitacao));
     addRow("Centro de Custo / WBS:", atm.wbs, "", "");
     y += 2;
 
-    // --- 2. LOCAL DA COLETA (ORIGEM) ---
     addSectionTitle("2. LOCAL DA COLETA (ORIGEM)");
     const enderecoOrigem = `${atm.origem?.nome_local || 'Não informado'}, ${atm.origem?.municipio || ''}`;
     addRow("Endereço de Coleta:", enderecoOrigem);
@@ -123,14 +121,12 @@ export default function AdminDashboard() {
     addRow("Data Previsão:", formatarData(dataCriacao)); 
     y += 2;
 
-    // --- 3. LOCAL DA ENTREGA (DESTINO) ---
     addSectionTitle("3. LOCAL DA ENTREGA (DESTINO)");
     const enderecoDestino = `${atm.destino?.nome_local || 'Destinatário'}, ${atm.destino?.municipio || ''}`;
     addRow("Endereço de Entrega:", enderecoDestino);
     addRow("Data Previsão:", formatarData(atm.data_entrega));
     y += 2;
 
-    // --- 4. DADOS DO MATERIAL E FRETE ---
     addSectionTitle("4. DADOS DO MATERIAL E FRETE");
     addRow("Transportadora:", atm.transportadora?.nome || "A Definir");
     addRow("Peso Estimado:", atm.peso ? `${atm.peso} kg` : "Não informado", "Volume:", atm.volume ? `${atm.volume} m³` : "Não informado");
@@ -138,16 +134,14 @@ export default function AdminDashboard() {
     addRow("Pedido de Compra:", atm.pedido_compra, "Nota Fiscal:", atm.nf);
     y += 2;
 
-    // --- 5. OBSERVAÇÕES ---
     addSectionTitle("5. OBSERVAÇÕES");
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     const obsText = String(atm.observacoes || "Nenhuma observação.");
     const linhasObs = doc.splitTextToSize(obsText, 170);
     doc.text(linhasObs, 20, y);
-    y += (linhasObs.length * 6) + 20; // Espaço grande para a assinatura
+    y += (linhasObs.length * 6) + 20;
 
-    // --- ASSINATURA ---
     doc.setFont("helvetica", "bold");
     const nomeSolicitante = String(atm.solicitacao || 'SISTEMA').toUpperCase();
     doc.text(`ASSINATURA DO SOLICITANTE: ${nomeSolicitante}`, 20, y);
@@ -157,7 +151,6 @@ export default function AdminDashboard() {
     doc.setFontSize(9);
     doc.text("Documento gerado eletronicamente via ATM Log.", 20, y);
 
-    // Salva o PDF no computador
     doc.save(`ATM_${shortId(atm.id)}_Autorizacao.pdf`);
   };
 
@@ -168,7 +161,7 @@ export default function AdminDashboard() {
           <h3 className="section-title"><TableList size={24} className="text-primary" /> Banco de Dados (ATMs)</h3>
           <div className="search-wrapper">
             <Search className="search-icon" size={18} />
-            <input type="text" placeholder="Buscar..." className="search-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <input type="text" placeholder="Buscar por ID, NF, Pedido..." className="search-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </div>
         <div className="table-container">
@@ -192,10 +185,13 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* MODAL */}
+      {/* ==============================================================
+          MODAL EXPANDIDO E EMBELEZADO (COM TODAS AS INFORMAÇÕES)
+          ============================================================== */}
       {selectedAtm && (
         <div className="modal-overlay">
-          <div className="modal-content fade-in">
+          {/* Aumentei a largura máxima para 900px para acomodar tudo graciosamente */}
+          <div className="modal-content fade-in" style={{ maxWidth: '900px' }}>
             <div className="modal-header">
               <div>
                 <span className="modal-subtitle">Ficha Cadastral Logística</span>
@@ -204,32 +200,100 @@ export default function AdminDashboard() {
               <button className="btn-close" onClick={() => setSelectedAtm(null)}><X size={24} /></button>
             </div>
             
-            <div className="modal-body">
-              <div className="modal-grid">
-                <div className="modal-section">
-                  <h4>Identificação</h4>
-                  <ul>
-                    <li><span>Solicitante:</span> <strong>{selectedAtm.solicitacao || 'Não informado'}</strong></li>
-                    <li><span>Pedido:</span> <strong>{selectedAtm.pedido_compra || 'Não informado'}</strong></li>
-                    <li><span>Nota Fiscal:</span> <strong>{selectedAtm.nf || 'Não informado'}</strong></li>
-                    <li><span>WBS:</span> <strong>{selectedAtm.wbs || 'Não informado'}</strong></li>
+            {/* Scroll inteligente ativado caso o monitor seja pequeno */}
+            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '2rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem' }}>
+                
+                {/* --- BLOCO 1: IDENTIFICAÇÃO --- */}
+                <div>
+                  <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>
+                    Identificação Básica
+                  </h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Solicitante:</span> <strong style={{color: '#111827'}}>{selectedAtm.solicitacao || 'Não informado'}</strong></li>
+                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Data Solicitação:</span> <strong style={{color: '#111827'}}>{formatarData(selectedAtm.data_solicitacao || selectedAtm.created_at?.split('T')[0])}</strong></li>
+                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Pedido de Compra:</span> <strong style={{color: '#111827'}}>{selectedAtm.pedido_compra || 'Não informado'}</strong></li>
+                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Nota Fiscal:</span> <strong style={{color: '#111827'}}>{selectedAtm.nf || 'Não informado'}</strong></li>
+                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>WBS / C. Custo:</span> <strong style={{color: '#111827'}}>{selectedAtm.wbs || 'Não informado'}</strong></li>
                   </ul>
                 </div>
-                <div className="modal-section">
-                  <h4>Carga e Veículo</h4>
-                  <ul>
-                    <li><span>Peso:</span> <strong>{selectedAtm.peso ? `${selectedAtm.peso} kg` : 'Não informado'}</strong></li>
-                    <li><span>Volume:</span> <strong>{selectedAtm.volume ? `${selectedAtm.volume} m³` : 'Não informado'}</strong></li>
-                    <li><span>Veículo:</span> <strong>{selectedAtm.veiculo || 'Não informado'}</strong></li>
-                    <li><span>Status:</span> <span className={`badge ${getStatusClass(selectedAtm.status)}`}>{selectedAtm.status}</span></li>
+
+                {/* --- BLOCO 2: LOGÍSTICA --- */}
+                <div>
+                  <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>
+                    Carga e Transporte
+                  </h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Peso Estimado:</span> <strong style={{color: '#111827'}}>{selectedAtm.peso ? `${selectedAtm.peso} kg` : 'Não informado'}</strong></li>
+                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Volume:</span> <strong style={{color: '#111827'}}>{selectedAtm.volume ? `${selectedAtm.volume} m³` : 'Não informado'}</strong></li>
+                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Veículo / Modal:</span> <strong style={{color: '#111827'}}>{selectedAtm.veiculo || 'Não informado'}</strong></li>
+                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Tipo de Frete:</span> <strong style={{color: '#111827'}}>{selectedAtm.tipo_frete || 'Não informado'}</strong></li>
+                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Transportadora:</span> <strong style={{color: '#111827'}}>{selectedAtm.transportadora?.nome || 'A Definir'}</strong></li>
                   </ul>
+                </div>
+
+                {/* --- BLOCO 3: ROTA DETALHADA --- */}
+                <div>
+                  <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>
+                    Rota (Origem e Destino)
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    
+                    {/* Cartão de Origem */}
+                    <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold' }}>De: (Coleta)</span>
+                      <strong style={{ display: 'block', color: '#111827', marginTop: '0.25rem', fontSize: '1rem' }}>{selectedAtm.origem?.nome_local || 'Não informado'}</strong>
+                      <span style={{ fontSize: '0.875rem', color: '#4b5563' }}>{selectedAtm.origem?.municipio} - {selectedAtm.origem?.uf}</span>
+                    </div>
+
+                    {/* Cartão de Destino */}
+                    <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold' }}>Para: (Entrega)</span>
+                      <strong style={{ display: 'block', color: '#111827', marginTop: '0.25rem', fontSize: '1rem' }}>{selectedAtm.destino?.nome_local || 'Não informado'}</strong>
+                      <span style={{ fontSize: '0.875rem', color: '#4b5563' }}>{selectedAtm.destino?.municipio} - {selectedAtm.destino?.uf}</span>
+                      
+                      <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                        <span style={{ color: '#6b7280' }}>Data Previsão:</span>
+                        <strong style={{ color: '#111827' }}>{formatarData(selectedAtm.data_entrega)}</strong>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* --- BLOCO 4: VALORES E OBSERVAÇÕES --- */}
+                <div>
+                  <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>
+                    Acompanhamento Financeiro
+                  </h4>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <span style={{ color: '#6b7280', fontSize: '0.95rem' }}>Status Atual:</span> 
+                    <span className={`badge ${getStatusClass(selectedAtm.status)}`} style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}>{selectedAtm.status}</span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', backgroundColor: '#ecfdf5', padding: '0.75rem 1rem', borderRadius: '0.5rem', border: '1px solid #a7f3d0' }}>
+                    <span style={{ color: '#065f46', fontWeight: 'bold' }}>Valor do Frete:</span> 
+                    <strong style={{ color: '#059669', fontSize: '1.2rem' }}>{formatarValor(selectedAtm.valor_nf || selectedAtm.cotacao_bid)}</strong>
+                  </div>
+
+                  {/* Caixa Destaque de Observações */}
+                  <div style={{ backgroundColor: '#fffbeb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #fde68a' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#92400e', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                      <FileText size={14} /> Observações do Solicitante
+                    </span>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#92400e', lineHeight: '1.5' }}>
+                      {selectedAtm.observacoes || 'Nenhuma observação extra registrada.'}
+                    </p>
+                  </div>
+
                 </div>
               </div>
             </div>
 
             <div className="modal-footer">
               <button className="btn-danger" onClick={() => gerarPDF(selectedAtm)}>
-                <FileText size={18}/> Gerar PDF
+                <FileText size={18}/> Gerar PDF Oficial
               </button>
               <button className="btn-secondary" onClick={() => setSelectedAtm(null)}>Fechar</button>
             </div>
