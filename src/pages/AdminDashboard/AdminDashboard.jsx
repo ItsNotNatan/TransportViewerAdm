@@ -31,9 +31,19 @@ export default function AdminDashboard() {
     }
   };
 
+  // ========================================================
+  // FILTRO BLINDADO - MOSTRA TUDO SE ESTIVER VAZIO!
+  // ========================================================
   const atmsFiltrados = atms.filter(atm => {
+    if (!searchTerm) return true; // Se não digitou nada, mostra todos!
+
     const termo = searchTerm.toLowerCase();
-    return (atm.pedido_compra?.toLowerCase().includes(termo) || atm.nf?.toLowerCase().includes(termo) || atm.wbs?.toLowerCase().includes(termo));
+    return (
+      atm.pedido_compra?.toLowerCase().includes(termo) || 
+      atm.nf?.toLowerCase().includes(termo) || 
+      atm.wbs?.toLowerCase().includes(termo) ||
+      atm.id?.toLowerCase().includes(termo)
+    );
   });
 
   const getStatusClass = (status) => {
@@ -169,7 +179,7 @@ export default function AdminDashboard() {
             <tbody>
               {carregando ? (<tr><td colSpan="8" className="text-center" style={{padding: '2rem'}}>Carregando...</td></tr>) : atmsFiltrados.map((atm) => (
                 <tr key={atm.id}>
-                  <td className="font-bold">#{shortId(atm.id)}</td>
+                  <td className="font-bold" title={atm.id}>#{shortId(atm.id)}</td>
                   <td>{atm.pedido_compra || '-'}</td><td>{atm.nf || '-'}</td><td>{atm.wbs || '-'}</td>
                   <td>De: {atm.origem?.municipio} <br/>Para: {atm.destino?.municipio}</td>
                   <td>{atm.veiculo}</td>
