@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import html2pdf from 'html2pdf.js';
 
-// Importação da logo (certifique-se de que o caminho está correto)
+// Importação da logo 
 import logoComau from '../../assets/logo-comau.png';
 
 // Ícone do botão
@@ -13,7 +13,6 @@ export default function BtnPdf({ atm }) {
 
   if (!atm) return null;
 
-  // Funções de formatação específicas para o PDF
   const shortId = (id) => id ? id.substring(0, 8).toUpperCase() : 'N/A';
   const formatarData = (dataStr) => {
     if (!dataStr) return '';
@@ -29,10 +28,10 @@ export default function BtnPdf({ atm }) {
     element.style.display = 'block';
 
     const opt = {
-      margin:       10,
+      margin:       10, 
       filename:     `ATM_${shortId(atm.id)}_Autorizacao.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true }, 
+      html2canvas:  { scale: 2, useCORS: true, windowWidth: 850 }, 
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -46,106 +45,113 @@ export default function BtnPdf({ atm }) {
 
   return (
     <>
-      {/* BOTÃO VISÍVEL */}
       <button className="btn-danger" onClick={gerarPDF} disabled={gerando}>
         <FileText size={18}/> {gerando ? 'Gerando...' : 'Gerar PDF Oficial'}
       </button>
 
       {/* TEMPLATE DO PDF ESCONDIDO */}
       <div style={{ display: 'none' }}>
-        <div ref={pdfRef} style={{ width: '800px', padding: '40px', backgroundColor: 'white', color: 'black', fontFamily: 'sans-serif' }}>
+        {/* Reduzi o padding vertical de 40px para 30px */}
+        <div ref={pdfRef} style={{ width: '100%', maxWidth: '800px', padding: '30px 40px', backgroundColor: 'white', color: 'black', fontFamily: 'sans-serif', boxSizing: 'border-box' }}>
           
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-            
-            {/* 👇 AQUI ESTÁ A LOGO SUBSTITUINDO O TEXTO 👇 */}
-            <div style={{ width: '25%', display: 'flex', alignItems: 'center' }}>
-               <img src={logoComau} alt="Logo Comau" style={{ maxHeight: '60px', maxWidth: '100%', objectFit: 'contain' }} />
+          {/* Cabeçalho - Margem inferior reduzida de 30px para 20px */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div style={{ width: '25%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+               <img src={logoComau} alt="Logo Comau" style={{ maxHeight: '90px', maxWidth: '100%', objectFit: 'contain' }} />
             </div>
-            {/* 👆 ========================================== 👆 */}
 
             <div style={{ width: '50%', textAlign: 'center' }}>
               <h1 style={{ fontSize: '20px', fontWeight: 'bold', textTransform: 'uppercase', margin: 0 }}>ATM - Autorização de Transporte<br/>de Mercadoria</h1>
-              <h2 style={{ fontSize: '16px', fontWeight: '600', textTransform: 'uppercase', marginTop: '8px', color: '#4b5563' }}>Sistema de Gestão Logística</h2>
+              <h2 style={{ fontSize: '15px', fontWeight: '600', textTransform: 'uppercase', marginTop: '6px', color: '#4b5563' }}>Sistema de Gestão Logística</h2>
             </div>
             <div style={{ width: '25%' }}></div>
           </div>
 
-          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <div style={{ display: 'inline-block', border: '2px solid black', padding: '8px 16px', fontSize: '18px', fontWeight: 'bold' }}>
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <div style={{ display: 'inline-block', border: '2px solid black', padding: '6px 14px', fontSize: '16px', fontWeight: 'bold' }}>
               N° ATM: {shortId(atm.id)}
             </div>
           </div>
 
-          <div style={{ marginBottom: '25px' }}>
-            <h4 style={{ fontWeight: 'bold', fontSize: '16px', backgroundColor: '#f3f4f6', border: '1px solid black', padding: '8px', marginBottom: '15px', margin: 0 }}>1. IDENTIFICAÇÃO</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', padding: '0 10px', marginTop: '10px' }}>
-              <div style={{ borderBottom: '1px solid black', paddingBottom: '4px' }}><strong>Solicitante:</strong> {atm.solicitacao || 'N/A'}</div>
-              <div style={{ borderBottom: '1px solid black', paddingBottom: '4px' }}><strong>Data da Solicitação:</strong> {formatarData(atm.data_solicitacao)}</div>
-              <div style={{ borderBottom: '1px solid black', paddingBottom: '4px', gridColumn: 'span 2' }}><strong>Centro de Custo / WBS:</strong> {atm.wbs || 'N/A'}</div>
+          {/* Todas as sessões tiveram a margem inferior (marginBottom) reduzida de 25px para 15px */}
+          {/* 1. IDENTIFICAÇÃO */}
+          <div style={{ marginBottom: '15px' }}>
+            <h4 style={{ fontWeight: 'bold', fontSize: '15px', backgroundColor: '#f3f4f6', border: '1px solid black', padding: '6px 8px', marginBottom: '10px', margin: 0 }}>1. IDENTIFICAÇÃO</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', padding: '0 10px', marginTop: '8px', boxSizing: 'border-box', fontSize: '14px' }}>
+              <div style={{ borderBottom: '1px solid black', paddingBottom: '2px' }}><strong>Solicitante:</strong> {atm.solicitacao || 'N/A'}</div>
+              <div style={{ borderBottom: '1px solid black', paddingBottom: '2px' }}><strong>Data da Solicitação:</strong> {formatarData(atm.data_solicitacao)}</div>
+              <div style={{ borderBottom: '1px solid black', paddingBottom: '2px', gridColumn: 'span 2' }}><strong>Centro de Custo / WBS:</strong> {atm.wbs || 'N/A'}</div>
             </div>
           </div>
 
-          <div style={{ marginBottom: '25px' }}>
-            <h4 style={{ fontWeight: 'bold', fontSize: '16px', backgroundColor: '#f3f4f6', border: '1px solid black', padding: '8px', marginBottom: '15px', margin: 0 }}>2. LOCAL DA COLETA (ORIGEM)</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', padding: '0 10px', marginTop: '10px' }}>
-              <div style={{ borderBottom: '1px solid black', paddingBottom: '4px' }}><strong>Endereço de Coleta:</strong> {atm.origem?.nome_local}, {atm.origem?.municipio}-{atm.origem?.uf}</div>
-              <div style={{ borderBottom: '1px solid black', paddingBottom: '4px' }}><strong>Data Previsão:</strong> {formatarData(atm.created_at?.split('T')[0])}</div>
+          {/* 2. LOCAL DA COLETA */}
+          <div style={{ marginBottom: '15px' }}>
+            <h4 style={{ fontWeight: 'bold', fontSize: '15px', backgroundColor: '#f3f4f6', border: '1px solid black', padding: '6px 8px', marginBottom: '10px', margin: 0 }}>2. LOCAL DA COLETA (ORIGEM)</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', padding: '0 10px', marginTop: '8px', boxSizing: 'border-box', fontSize: '14px' }}>
+              <div style={{ borderBottom: '1px solid black', paddingBottom: '2px' }}><strong>Endereço de Coleta:</strong> {atm.origem?.nome_local}, {atm.origem?.municipio}-{atm.origem?.uf}</div>
+              <div style={{ borderBottom: '1px solid black', paddingBottom: '2px' }}><strong>Data Previsão:</strong> {formatarData(atm.created_at?.split('T')[0])}</div>
             </div>
           </div>
 
-          <div style={{ marginBottom: '25px' }}>
-            <h4 style={{ fontWeight: 'bold', fontSize: '16px', backgroundColor: '#f3f4f6', border: '1px solid black', padding: '8px', marginBottom: '15px', margin: 0 }}>3. LOCAL DA ENTREGA (DESTINO)</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', padding: '0 10px', marginTop: '10px' }}>
-              <div style={{ borderBottom: '1px solid black', paddingBottom: '4px' }}><strong>Endereço de Entrega:</strong> {atm.destino?.nome_local}, {atm.destino?.municipio}-{atm.destino?.uf}</div>
-              <div style={{ borderBottom: '1px solid black', paddingBottom: '4px' }}><strong>Data Previsão:</strong> {formatarData(atm.data_entrega)}</div>
+          {/* 3. LOCAL DA ENTREGA */}
+          <div style={{ marginBottom: '15px' }}>
+            <h4 style={{ fontWeight: 'bold', fontSize: '15px', backgroundColor: '#f3f4f6', border: '1px solid black', padding: '6px 8px', marginBottom: '10px', margin: 0 }}>3. LOCAL DA ENTREGA (DESTINO)</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', padding: '0 10px', marginTop: '8px', boxSizing: 'border-box', fontSize: '14px' }}>
+              <div style={{ borderBottom: '1px solid black', paddingBottom: '2px' }}><strong>Endereço de Entrega:</strong> {atm.destino?.nome_local}, {atm.destino?.municipio}-{atm.destino?.uf}</div>
+              <div style={{ borderBottom: '1px solid black', paddingBottom: '2px' }}><strong>Data Previsão:</strong> {formatarData(atm.data_entrega)}</div>
             </div>
           </div>
 
-          <div style={{ marginBottom: '25px' }}>
-            <h4 style={{ fontWeight: 'bold', fontSize: '16px', backgroundColor: '#f3f4f6', border: '1px solid black', padding: '8px', marginBottom: '15px', margin: 0 }}>4. DADOS DO MATERIAL E FRETE</h4>
-            <div style={{ padding: '0 10px', marginTop: '10px' }}>
-              <div style={{ borderBottom: '1px solid black', paddingBottom: '4px', marginBottom: '15px' }}><strong>Transportadora:</strong> {atm.transportadora?.nome || 'A Definir'}</div>
+          {/* 4. DADOS DO MATERIAL E FRETE */}
+          <div style={{ marginBottom: '15px' }}>
+            <h4 style={{ fontWeight: 'bold', fontSize: '15px', backgroundColor: '#f3f4f6', border: '1px solid black', padding: '6px 8px', marginBottom: '10px', margin: 0 }}>4. DADOS DO MATERIAL E FRETE</h4>
+            <div style={{ padding: '0 10px', marginTop: '8px', boxSizing: 'border-box' }}>
+              <div style={{ borderBottom: '1px solid black', paddingBottom: '2px', marginBottom: '10px', fontSize: '14px' }}><strong>Transportadora:</strong> {atm.transportadora?.nome || 'A Definir'}</div>
               
-              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black', fontSize: '14px' }}>
+              {/* Reduzi o padding interno da tabela de 8px para 6px */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black', fontSize: '13px', tableLayout: 'fixed' }}>
                 <tbody>
                   <tr>
-                    <th style={{ border: '1px solid black', padding: '8px', backgroundColor: '#f9fafb', width: '25%', textAlign: 'left' }}>Peso Estimado:</th>
-                    <td style={{ border: '1px solid black', padding: '8px', width: '25%' }}>{atm.peso ? `${atm.peso} kg` : '-'}</td>
-                    <th style={{ border: '1px solid black', padding: '8px', backgroundColor: '#f9fafb', width: '25%', textAlign: 'left' }}>Volume:</th>
-                    <td style={{ border: '1px solid black', padding: '8px', width: '25%' }}>{atm.volume ? `${atm.volume} m³` : '-'}</td>
+                    <th style={{ border: '1px solid black', padding: '6px', backgroundColor: '#f9fafb', width: '25%', textAlign: 'left' }}>Peso Estimado:</th>
+                    <td style={{ border: '1px solid black', padding: '6px', width: '25%', wordWrap: 'break-word' }}>{atm.peso ? `${atm.peso} kg` : '-'}</td>
+                    <th style={{ border: '1px solid black', padding: '6px', backgroundColor: '#f9fafb', width: '25%', textAlign: 'left' }}>Volume:</th>
+                    <td style={{ border: '1px solid black', padding: '6px', width: '25%', wordWrap: 'break-word' }}>{atm.volume ? `${atm.volume} m³` : '-'}</td>
                   </tr>
                   <tr>
-                    <th style={{ border: '1px solid black', padding: '8px', backgroundColor: '#f9fafb', textAlign: 'left' }}>Tipo Veículo:</th>
-                    <td style={{ border: '1px solid black', padding: '8px' }}>{atm.veiculo || '-'}</td>
-                    <th style={{ border: '1px solid black', padding: '8px', backgroundColor: '#f9fafb', textAlign: 'left' }}>Tipo de Frete:</th>
-                    <td style={{ border: '1px solid black', padding: '8px' }}>{atm.tipo_frete || '-'}</td>
+                    <th style={{ border: '1px solid black', padding: '6px', backgroundColor: '#f9fafb', textAlign: 'left' }}>Tipo Veículo:</th>
+                    <td style={{ border: '1px solid black', padding: '6px', wordWrap: 'break-word' }}>{atm.veiculo || '-'}</td>
+                    <th style={{ border: '1px solid black', padding: '6px', backgroundColor: '#f9fafb', textAlign: 'left' }}>Tipo de Frete:</th>
+                    <td style={{ border: '1px solid black', padding: '6px', wordWrap: 'break-word' }}>{atm.tipo_frete || '-'}</td>
                   </tr>
                   <tr>
-                    <th style={{ border: '1px solid black', padding: '8px', backgroundColor: '#f9fafb', textAlign: 'left' }}>Pedido de Compra:</th>
-                    <td style={{ border: '1px solid black', padding: '8px' }}>{atm.pedido_compra || '-'}</td>
-                    <th style={{ border: '1px solid black', padding: '8px', backgroundColor: '#f9fafb', textAlign: 'left' }}>Nota Fiscal:</th>
-                    <td style={{ border: '1px solid black', padding: '8px' }}>{atm.nf || '-'}</td>
+                    <th style={{ border: '1px solid black', padding: '6px', backgroundColor: '#f9fafb', textAlign: 'left' }}>Pedido de Compra:</th>
+                    <td style={{ border: '1px solid black', padding: '6px', wordWrap: 'break-word' }}>{atm.pedido_compra || '-'}</td>
+                    <th style={{ border: '1px solid black', padding: '6px', backgroundColor: '#f9fafb', textAlign: 'left' }}>Nota Fiscal:</th>
+                    <td style={{ border: '1px solid black', padding: '6px', wordWrap: 'break-word' }}>{atm.nf || '-'}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div style={{ marginBottom: '40px' }}>
-            <h4 style={{ fontWeight: 'bold', fontSize: '16px', backgroundColor: '#f3f4f6', border: '1px solid black', padding: '8px', marginBottom: '15px', margin: 0 }}>5. OBSERVAÇÕES</h4>
-            <div style={{ padding: '10px', border: '1px solid #d1d5db', minHeight: '60px' }}>
+          {/* 5. OBSERVAÇÕES */}
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ fontWeight: 'bold', fontSize: '15px', backgroundColor: '#f3f4f6', border: '1px solid black', padding: '6px 8px', marginBottom: '10px', margin: 0 }}>5. OBSERVAÇÕES</h4>
+            <div style={{ padding: '8px', border: '1px solid #d1d5db', minHeight: '40px', wordWrap: 'break-word', boxSizing: 'border-box', fontSize: '13px' }}>
               {atm.observacoes || 'Nenhuma observação registrada.'}
             </div>
           </div>
 
-          <div style={{ marginTop: '80px', textAlign: 'center' }}>
-            <div style={{ width: '60%', borderTop: '2px solid black', margin: '0 auto', paddingTop: '10px', fontWeight: 'bold' }}>
+          {/* Rodapé e Assinaturas - Reduzi drasticamente a margem de 80px para 30px */}
+          <div style={{ marginTop: '30px', textAlign: 'center' }}>
+            <div style={{ width: '60%', borderTop: '2px solid black', margin: '0 auto', paddingTop: '6px', fontWeight: 'bold', fontSize: '14px' }}>
               ASSINATURA DO SOLICITANTE
             </div>
-            <div style={{ marginTop: '10px', textTransform: 'uppercase' }}>
+            <div style={{ marginTop: '6px', textTransform: 'uppercase', fontSize: '14px' }}>
               {atm.solicitacao || 'N/A'}
             </div>
-            <p style={{ fontSize: '12px', color: '#6b7280', fontStyle: 'italic', marginTop: '40px' }}>
+            {/* Margem do texto menorzinha no fim da folha reduzida de 40px para 20px */}
+            <p style={{ fontSize: '11px', color: '#6b7280', fontStyle: 'italic', marginTop: '20px', marginBottom: 0 }}>
               Documento gerado eletronicamente via ATM Log.
             </p>
           </div>
