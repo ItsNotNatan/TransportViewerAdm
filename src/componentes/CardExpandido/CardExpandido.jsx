@@ -20,7 +20,7 @@ export default function CardExpandido({ atm, onClose, onAtmUpdated }) {
   };
   
   const formatarData = (dataStr) => {
-    if (!dataStr) return '';
+    if (!dataStr) return 'Não informada';
     const partes = dataStr.split('-');
     if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
     return dataStr;
@@ -32,91 +32,130 @@ export default function CardExpandido({ atm, onClose, onAtmUpdated }) {
   };
 
   const lidarComSalvar = () => {
-    setModoEdicao(false); // Sai do modo edição
-    if (onAtmUpdated) onAtmUpdated(); // Atualiza a tabela
+    setModoEdicao(false); 
+    if (onAtmUpdated) onAtmUpdated(); 
   };
+
+  // Estilo reutilizável para a lista de itens
+  const liStyle = { display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f3f4f6', paddingBottom: '0.25rem' };
+  const spanStyle = { color: '#6b7280', fontSize: '0.9rem' };
+  const strongStyle = { color: '#111827', fontSize: '0.9rem', textAlign: 'right', maxWidth: '60%' };
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content fade-in" style={{ maxWidth: '900px' }}>
+      <div className="modal-content fade-in" style={{ maxWidth: '1000px' }}> {/* Aumentei a largura máxima para caber mais dados */}
         
-        {/* CABEÇALHO DO MODAL (Fixo) */}
         <div className="modal-header">
           <div>
-            <span className="modal-subtitle">{modoEdicao ? 'Editando Informações' : 'Ficha Cadastral Logística'}</span>
+            <span className="modal-subtitle">{modoEdicao ? 'Editando Informações' : 'Ficha Cadastral Logística Detalhada'}</span>
             <h2 className="modal-title">ATM #{shortId(atm.id)}</h2>
           </div>
           <button className="btn-close" onClick={onClose}><X size={24} /></button>
         </div>
 
-        {/* DECISÃO DE RENDERIZAÇÃO: MODO LEITURA OU MODO EDIÇÃO */}
         {modoEdicao ? (
-          
-          <CardEditavel 
-            atm={atm} 
-            onCancelar={() => setModoEdicao(false)} 
-            onSalvar={lidarComSalvar} 
-          />
-
+          <CardEditavel atm={atm} onCancelar={() => setModoEdicao(false)} onSalvar={lidarComSalvar} />
         ) : (
-          
           <>
-            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '2rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem' }}>
+            <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto', padding: '2rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                
+                {/* 1. IDENTIFICAÇÃO */}
                 <div>
-                  <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Identificação Básica</h4>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Solicitante:</span> <strong style={{color: '#111827'}}>{atm.solicitacao || 'Não informado'}</strong></li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Data Solicitação:</span> <strong style={{color: '#111827'}}>{formatarData(atm.data_solicitacao || atm.created_at?.split('T')[0])}</strong></li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Pedido de Compra:</span> <strong style={{color: '#111827'}}>{atm.pedido_compra || 'Não informado'}</strong></li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Nota Fiscal:</span> <strong style={{color: '#111827'}}>{atm.nf || 'Não informado'}</strong></li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>WBS / C. Custo:</span> <strong style={{color: '#111827'}}>{atm.wbs || 'Não informado'}</strong></li>
+                  <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Identificação do Pedido</h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <li style={liStyle}><span style={spanStyle}>Solicitante:</span> <strong style={strongStyle}>{atm.solicitacao || 'Não informado'}</strong></li>
+                    <li style={liStyle}><span style={spanStyle}>ID do Sistema:</span> <strong style={strongStyle}>{atm.id}</strong></li>
+                    <li style={liStyle}><span style={spanStyle}>Data Solicitação:</span> <strong style={strongStyle}>{formatarData(atm.data_solicitacao || atm.created_at?.split('T')[0])}</strong></li>
+                    <li style={liStyle}><span style={spanStyle}>Pedido de Compra:</span> <strong style={strongStyle}>{atm.pedido_compra || 'Não informado'}</strong></li>
+                    <li style={liStyle}><span style={spanStyle}>Nota Fiscal:</span> <strong style={strongStyle}>{atm.nf || 'Não informado'}</strong></li>
+                    <li style={liStyle}><span style={spanStyle}>WBS / C. Custo:</span> <strong style={strongStyle}>{atm.wbs || 'Não informado'}</strong></li>
                   </ul>
                 </div>
+
+                {/* 2. CARGA E TRANSPORTE */}
                 <div>
-                  <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Carga e Transporte</h4>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Peso Estimado:</span> <strong style={{color: '#111827'}}>{atm.peso ? `${atm.peso} kg` : 'Não informado'}</strong></li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Volume:</span> <strong style={{color: '#111827'}}>{atm.volume ? `${atm.volume} m³` : 'Não informado'}</strong></li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Veículo / Modal:</span> <strong style={{color: '#111827'}}>{atm.veiculo || 'Não informado'}</strong></li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Tipo de Frete:</span> <strong style={{color: '#111827'}}>{atm.tipo_frete || 'Não informado'}</strong></li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{color: '#6b7280'}}>Transportadora:</span> <strong style={{color: '#111827'}}>{atm.transportadora?.nome || 'A Definir'}</strong></li>
+                  <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Características da Carga</h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <li style={liStyle}><span style={spanStyle}>Peso Estimado:</span> <strong style={strongStyle}>{atm.peso ? `${atm.peso} kg` : 'Não informado'}</strong></li>
+                    <li style={liStyle}><span style={spanStyle}>Volume:</span> <strong style={strongStyle}>{atm.volume ? `${atm.volume} m³` : 'Não informado'}</strong></li>
+                    <li style={liStyle}><span style={spanStyle}>Medidas (CxLxA):</span> <strong style={strongStyle}>{atm.medidas || 'Não informado'}</strong></li>
+                    <li style={liStyle}><span style={spanStyle}>Veículo / Modal:</span> <strong style={strongStyle}>{atm.veiculo || 'Não informado'}</strong></li>
+                    <li style={liStyle}><span style={spanStyle}>Tipo de Frete:</span> <strong style={strongStyle}>{atm.tipo_frete || 'Não informado'}</strong></li>
+                    <li style={liStyle}><span style={spanStyle}>Transportadora:</span> <strong style={strongStyle}>{atm.transportadora?.nome || 'A Definir'}</strong></li>
                   </ul>
                 </div>
-                <div>
-                  <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Rota (Origem e Destino)</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold' }}>De: (Coleta)</span>
-                      <strong style={{ display: 'block', color: '#111827', marginTop: '0.25rem', fontSize: '1rem' }}>{atm.origem?.nome_local || 'Não informado'}</strong>
-                      <span style={{ fontSize: '0.875rem', color: '#4b5563' }}>{atm.origem?.municipio} - {atm.origem?.uf}</span>
+
+                {/* 3. ORIGEM E DESTINO (DETALHADO) */}
+                <div style={{ gridColumn: 'span 2' }}>
+                  <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Rota Detalhada</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                    
+                    {/* ORIGEM */}
+                    <div style={{ backgroundColor: '#f9fafb', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold' }}>Origem (Coleta)</span>
+                      <strong style={{ display: 'block', color: '#111827', marginTop: '0.5rem', fontSize: '1.1rem' }}>{atm.origem?.nome_local || 'Fornecedor não especificado'}</strong>
+                      
+                      <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.9rem', color: '#4b5563' }}>
+                        <div><strong>CEP:</strong> {atm.origem?.cep || 'N/A'}</div>
+                        <div><strong>Endereço:</strong> {atm.origem?.logradouro || 'N/A'}, {atm.origem?.numero || 'S/N'}</div>
+                        <div><strong>Bairro:</strong> {atm.origem?.bairro || 'N/A'}</div>
+                        <div><strong>Cidade/UF:</strong> {atm.origem?.municipio} - {atm.origem?.uf}</div>
+                      </div>
+                      
+                      <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                        <span style={{ color: '#6b7280' }}>Previsão de Coleta:</span>
+                        <strong style={{ color: '#111827' }}>{formatarData(atm.created_at?.split('T')[0])}</strong>
+                      </div>
                     </div>
-                    <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold' }}>Para: (Entrega)</span>
-                      <strong style={{ display: 'block', color: '#111827', marginTop: '0.25rem', fontSize: '1rem' }}>{atm.destino?.nome_local || 'Não informado'}</strong>
-                      <span style={{ fontSize: '0.875rem', color: '#4b5563' }}>{atm.destino?.municipio} - {atm.destino?.uf}</span>
+
+                    {/* DESTINO */}
+                    <div style={{ backgroundColor: '#f9fafb', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold' }}>Destino (Entrega)</span>
+                      <strong style={{ display: 'block', color: '#111827', marginTop: '0.5rem', fontSize: '1.1rem' }}>{atm.destino?.nome_local || 'Destinatário não especificado'}</strong>
+                      
+                      <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.9rem', color: '#4b5563' }}>
+                        <div><strong>CEP:</strong> {atm.destino?.cep || 'N/A'}</div>
+                        <div><strong>Endereço:</strong> {atm.destino?.logradouro || 'N/A'}, {atm.destino?.numero || 'S/N'}</div>
+                        <div><strong>Bairro:</strong> {atm.destino?.bairro || 'N/A'}</div>
+                        <div><strong>Cidade/UF:</strong> {atm.destino?.municipio} - {atm.destino?.uf}</div>
+                      </div>
+
+                      <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                        <span style={{ color: '#6b7280' }}>Previsão de Entrega:</span>
+                        <strong style={{ color: '#111827' }}>{formatarData(atm.data_entrega)}</strong>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* 4. FINANCEIRO E OBSERVAÇÕES */}
+                <div style={{ gridColumn: 'span 2', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                  <div>
+                    <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Controle Financeiro</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <span style={{ color: '#6b7280', fontSize: '0.95rem' }}>Status Atual:</span> 
+                      <span className={`badge ${getStatusClass(atm.status)}`} style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}>{atm.status}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ecfdf5', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #a7f3d0' }}>
+                      <span style={{ color: '#065f46', fontWeight: 'bold' }}>Valor Final do Frete:</span> 
+                      <strong style={{ color: '#059669', fontSize: '1.3rem' }}>{formatarValor(atm.valor_nf || atm.cotacao_bid)}</strong>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Observações e Histórico</h4>
+                    <div style={{ backgroundColor: '#fffbeb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #fde68a', height: '100%' }}>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: '#92400e', whiteSpace: 'pre-wrap' }}>{atm.observacoes || 'Nenhuma observação extra registada no sistema.'}</p>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <h4 style={{ fontSize: '1.1rem', color: '#1f2937', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Acompanhamento e Financeiro</h4>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <span style={{ color: '#6b7280', fontSize: '0.95rem' }}>Status Atual:</span> 
-                    <span className={`badge ${getStatusClass(atm.status)}`} style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}>{atm.status}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', backgroundColor: '#ecfdf5', padding: '0.75rem 1rem', borderRadius: '0.5rem', border: '1px solid #a7f3d0' }}>
-                    <span style={{ color: '#065f46', fontWeight: 'bold' }}>Valor do Frete:</span> 
-                    <strong style={{ color: '#059669', fontSize: '1.2rem' }}>{formatarValor(atm.valor_nf || atm.cotacao_bid)}</strong>
-                  </div>
-                  <div style={{ backgroundColor: '#fffbeb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #fde68a' }}>
-                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#92400e', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '0.5rem' }}>Observações do Solicitante</span>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#92400e' }}>{atm.observacoes || 'Nenhuma observação extra registrada.'}</p>
-                  </div>
-                </div>
+
               </div>
             </div>
 
-            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e5e7eb', paddingTop: '1rem' }}>
               <BtnPdf atm={atm} />
               
               <div style={{ display: 'flex', gap: '1rem' }}>
