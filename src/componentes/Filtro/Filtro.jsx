@@ -1,5 +1,6 @@
 // src/componentes/Filtro.jsx
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom'; // <-- IMPORTAÇÃO NOVA E MÁGICA AQUI!
 
 // Ícones
 const XCircle = ({ size = 20, className = "" }) => (
@@ -81,17 +82,38 @@ export default function Filtro({ atms, filtros, onFiltroChange, onLimpar }) {
         )}
       </button>
 
-      {/* MODAL DE FILTRO (OVERLAY DE TELA CHEIA) */}
-      {aberto && (
-        <div className="modal-overlay" style={{ zIndex: 9999 }}>
-          <div className="modal-content fade-in" style={{ maxWidth: '600px', width: '100%' }}>
+      {/* O PORTAL JOGA O MODAL DIRETO PARA O BODY DO SITE, FORÇANDO TELA CHEIA */}
+      {aberto && createPortal(
+        <div 
+          className="modal-overlay" 
+          style={{ 
+            zIndex: 9999,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', /* Fundo escuro */
+            backdropFilter: 'blur(5px)',           /* O EFEITO DE EMBAÇAR A TELA */
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <div className="modal-content fade-in" style={{ maxWidth: '600px', width: '100%', backgroundColor: 'white', borderRadius: '0.5rem', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
             
-            <div className="modal-header">
+            <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', borderBottom: '1px solid #e5e7eb' }}>
               <div>
-                <span className="modal-subtitle">Refine sua busca</span>
-                <h2 className="modal-title">Filtros de Pesquisa</h2>
+                <span className="modal-subtitle" style={{ fontSize: '0.875rem', color: '#6b7280' }}>Refine sua busca</span>
+                <h2 className="modal-title" style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold', color: '#111827' }}>Filtros de Pesquisa</h2>
               </div>
-              <button className="btn-close" onClick={() => setAberto(false)}>
+              <button 
+                className="btn-close" 
+                onClick={() => setAberto(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '0.375rem', transition: 'background-color 0.2s' }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
                 <X size={24} />
               </button>
             </div>
@@ -144,15 +166,17 @@ export default function Filtro({ atms, filtros, onFiltroChange, onLimpar }) {
 
             </div>
 
-            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e5e7eb', paddingTop: '1rem', padding: '1rem 1.5rem' }}>
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb', padding: '1rem 1.5rem' }}>
               <div>
                 {temFiltroAtivo ? (
                   <button 
                     onClick={() => {
                       onLimpar();
-                      setAberto(false); // Opcional: fecha o modal ao limpar os filtros
+                      setAberto(false);
                     }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '0.375rem', border: '1px solid #fca5a5', backgroundColor: '#fee2e2', color: '#ef4444', fontWeight: 'bold', cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '0.375rem', border: '1px solid #fca5a5', backgroundColor: '#fee2e2', color: '#ef4444', fontWeight: 'bold', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fecaca'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
                   >
                     <XCircle size={16} /> Limpar Filtros
                   </button>
@@ -162,14 +186,17 @@ export default function Filtro({ atms, filtros, onFiltroChange, onLimpar }) {
               <button 
                 className="btn-secondary" 
                 onClick={() => setAberto(false)}
-                style={{ backgroundColor: '#2563eb', color: 'white', border: 'none', padding: '0.5rem 1.5rem', borderRadius: '0.375rem', fontWeight: 'bold', cursor: 'pointer' }}
+                style={{ backgroundColor: '#2563eb', color: 'white', border: 'none', padding: '0.5rem 1.5rem', borderRadius: '0.375rem', fontWeight: 'bold', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
               >
                 Ver Resultados
               </button>
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body // <-- ESTA É A MÁGICA DO PORTAL!
       )}
     </>
   );

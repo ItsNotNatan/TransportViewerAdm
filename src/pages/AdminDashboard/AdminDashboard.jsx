@@ -1,4 +1,3 @@
-// src/pages/AdminDashboard/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import CardExpandido from '../../componentes/CardExpandido/CardExpandido';
 import DashboardComponent from '../../componentes/Dashboard/Dashboard'; // Importando a tabela
