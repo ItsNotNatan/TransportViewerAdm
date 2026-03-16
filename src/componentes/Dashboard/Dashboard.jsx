@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import Filtro from '../Filtro/Filtro'; 
 import * as XLSX from 'xlsx';
 
+import templateExcel from '../../../public/GestaoFretesTemplate.xlsx';
+
 // --- Ícones SVG ---
 const TableList = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="3" x2="21" y1="15" y2="15"/><line x1="9" x2="9" y1="9" y2="21"/></svg>;
 const FolderOpen = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>;
@@ -45,112 +47,116 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
   };
 
   // ========================================================
-  // LÓGICA DE EXPORTAÇÃO PARA EXCEL MODO "ORIGINAL"
+  // LÓGICA DE EXPORTAÇÃO PARA EXCEL MODO "TEMPLATE"
   // ========================================================
-  const exportarExcel = () => {
+  const exportarExcel = async () => {
     if (atmsFiltrados.length === 0) {
       alert("Não há dados para exportar com os filtros atuais.");
       return;
     }
 
-    // 1. Organiza os dados EXACTAMENTE com os nomes da sua planilha original
-    const dadosFormatados = atmsFiltrados.map(atm => {
-      // Cria a rota automática "Origem x Destino"
-      const rotaStr = (atm.origem?.municipio && atm.destino?.municipio) 
-        ? `${atm.origem.uf} ${atm.origem.municipio} x ${atm.destino.municipio} ${atm.destino.uf}`
-        : '-';
+    try {
+      // 1. Busca o arquivo template na pasta 'public'
+      // ATENÇÃO: O arquivo precisa estar na pasta public do seu projeto e se chamar GestaoFretesTemplate.xlsx
+      // Onde estava: fetch('/GestaoFretesTemplate.xlsx')
+const response = await fetch(templateExcel);
+      
+      if (!response.ok) {
+        alert("Template não encontrado! Certifique-se de que o arquivo 'GestaoFretesTemplate.xlsx' está na pasta 'public' do seu projeto.");
+        return;
+      }
+      
+      const arrayBuffer = await response.arrayBuffer();
 
-      return {
-        "DATA DA SOLICITAÇÃO": atm.data_solicitacao ? atm.data_solicitacao.split('T')[0] : '-',
-        "ATM": atm.numero_atm || shortId(atm.id),
-        "PEDIDO DE COMPRA": atm.pedido_compra || '-',
-        "NF": atm.nf || '-',
-        "WBS": atm.wbs || '-',
-        "UF": atm.origem?.uf || '-',
-        "MUNICIPIO": atm.origem?.municipio || '-',
-        "LOCAL DE COLETA": atm.origem?.nome_local || '-',
-        "X": "x", // Coluna de separação que existe no seu excel
-        "LOCAL DA ENTREGA": atm.destino?.nome_local || '-',
-        "UF 2": atm.destino?.uf || '-',
-        "MUNICIPIO 2": atm.destino?.municipio || '-',
-        "Fracionado/Dedicado": atm.tipo_frete || '-',
-        "SOLICITAÇÃO": atm.solicitacao || '-',
-        "VEÍCULO": atm.veiculo || atm.modal || '-',
-        "TRANSPORTADORA": atm.transportadora?.nome || '-',
-        "COTAÇÃO/BID": atm.cotacao_bid ? "Cotação" : (atm.valor_bid ? "BID" : '-'),
-        "VALOR NF": atm.valor_nf || '-',
-        "VOLUME": atm.volume || '-',
-        "PESO": atm.peso || '-',
-        "VALOR BID (Dedicado)": atm.valor_bid_dedicado || '-',
-        "DATA DE ENTREGA": atm.data_entrega ? atm.data_entrega.split('T')[0] : '-',
-        "STATUS": atm.status || '-',
-        "OBSERVAÇÕES": atm.observacoes || '-',
-        "Valor BID": atm.valor_bid || atm.cotacao_bid || '-',
-        "ROTA": rotaStr,
-        "TIPO": atm.tipo_documento || '-',
-        "DATA MAPEAMENTO": atm.data_mapeamento ? atm.data_mapeamento.split('T')[0] : '-',
-        "CTE": atm.fatura_cte || '-',
-        "VALOR": atm.valor || '-',
-        "DATA EMISSÃO": atm.data_emissao ? atm.data_emissao.split('T')[0] : '-',
-        "VENCIMENTO": atm.vencimento ? atm.vencimento.split('T')[0] : '-',
-        "ELEMENTO PEP - CC / WBS": atm.elemento_pep_cc_wbs || '-',
-        "VALIDAÇÃO PEP - CC /WBS": atm.validacao_pep || '-',
-        "Registrado SAP (S/N)": atm.registrado_sap || '-',
-        "Registro SAP": atm.registro_sap || '-',
-        "Lançamento FI (S/N)": atm.lancamento_fi || '-',
-        "Processo lançamento FI": atm.processo_lancamento_fi || '-'
-      };
-    });
+      // 2. Lê o arquivo excel completo, preservando todas as abas
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 
-    const worksheet = XLSX.utils.json_to_sheet(dadosFormatados);
-    
-    // 2. Define o tamanho das colunas (Estilo do Excel) para não ficar esmagado
-    worksheet['!cols'] = [
-      { wch: 18 }, // DATA DA SOLICITAÇÃO
-      { wch: 10 }, // ATM
-      { wch: 18 }, // PEDIDO DE COMPRA
-      { wch: 12 }, // NF
-      { wch: 15 }, // WBS
-      { wch: 5 },  // UF
-      { wch: 20 }, // MUNICIPIO
-      { wch: 25 }, // LOCAL DE COLETA
-      { wch: 3 },  // X
-      { wch: 25 }, // LOCAL DA ENTREGA
-      { wch: 5 },  // UF 2
-      { wch: 20 }, // MUNICIPIO 2
-      { wch: 20 }, // Fracionado/Dedicado
-      { wch: 15 }, // SOLICITAÇÃO
-      { wch: 15 }, // VEÍCULO
-      { wch: 20 }, // TRANSPORTADORA
-      { wch: 15 }, // COTAÇÃO/BID
-      { wch: 12 }, // VALOR NF
-      { wch: 10 }, // VOLUME
-      { wch: 10 }, // PESO
-      { wch: 15 }, // VALOR BID (Dedicado)
-      { wch: 18 }, // DATA DE ENTREGA
-      { wch: 15 }, // STATUS
-      { wch: 40 }, // OBSERVAÇÕES
-      { wch: 15 }, // Valor BID
-      { wch: 40 }, // ROTA
-      { wch: 10 }, // TIPO
-      { wch: 18 }, // DATA MAPEAMENTO
-      { wch: 15 }, // CTE
-      { wch: 15 }, // VALOR
-      { wch: 15 }, // DATA EMISSÃO
-      { wch: 15 }, // VENCIMENTO
-      { wch: 25 }, // ELEMENTO PEP
-      { wch: 25 }, // VALIDAÇÃO PEP
-      { wch: 15 }, // Registrado SAP
-      { wch: 15 }, // Registro SAP
-      { wch: 15 }, // Lançamento FI
-      { wch: 20 }  // Processo lançamento FI
-    ];
+      // 3. Define a aba alvo
+      const abaNome = "ATM";
+      const worksheet = workbook.Sheets[abaNome];
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Gestão de Fretes - ATM");
-    
-    // Baixa o ficheiro
-    XLSX.writeFile(workbook, "Gestao_de_Fretes_ATMLOG.xlsx");
+      if (!worksheet) {
+        alert(`A aba "${abaNome}" não foi encontrada no template.`);
+        return;
+      }
+
+      // 4. Mapeia os dados filtrados em uma Matriz (Array de Arrays)
+      // A ordem deve seguir rigorosamente as colunas de A a AR do template.
+      const dadosMatriz = atmsFiltrados.map(atm => {
+        
+        // Formata a Rota
+        const rotaStr = (atm.origem?.municipio && atm.destino?.municipio) 
+          ? `${atm.origem.uf} ${atm.origem.municipio} x ${atm.destino.municipio} ${atm.destino.uf}`
+          : '-';
+
+        // Lógica simples para pegar Mês e Ano
+        let mesText = '-';
+        let mesAnoText = '-';
+        if (atm.data_solicitacao) {
+          const date = new Date(atm.data_solicitacao);
+          const meses = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+          mesText = meses[date.getMonth()];
+          mesAnoText = `${date.getFullYear()} ${mesText}`;
+        }
+
+        return [
+          atm.data_solicitacao ? atm.data_solicitacao.split('T')[0] : '-', // A: DATA DA SOLICITAÇÃO
+          atm.numero_atm || shortId(atm.id),                               // B: ATM
+          atm.pedido_compra || '-',                                        // C: PEDIDO DE COMPRA
+          atm.nf || '-',                                                   // D: NF
+          atm.wbs || '-',                                                  // E: WBS
+          atm.origem?.uf || '-',                                           // F: UF
+          atm.origem?.municipio || '-',                                    // G: MUNICIPIO
+          atm.origem?.nome_local || '-',                                   // H: LOCAL DE COLETA
+          "x",                                                             // I: X
+          atm.destino?.nome_local || '-',                                  // J: LOCAL DA ENTREGA
+          atm.destino?.uf || '-',                                          // K: UF 2
+          atm.destino?.municipio || '-',                                   // L: MUNICIPIO 2
+          atm.tipo_frete || '-',                                           // M: Fracionado/Dedicado
+          atm.solicitacao || '-',                                          // N: SOLICITAÇÃO
+          atm.veiculo || atm.modal || '-',                                 // O: VEÍCULO
+          atm.transportadora?.nome || '-',                                 // P: TRANSPORTADORA
+          atm.cotacao_bid ? "Cotação" : (atm.valor_bid ? "BID" : '-'),     // Q: COTAÇÃO/BID
+          atm.valor_nf || '',                                              // R: VALOR NF
+          atm.volume || '',                                                // S: VOLUME
+          atm.peso || '',                                                  // T: PESO
+          atm.valor_bid_dedicado || '',                                    // U: VALOR BID (Dedicado)
+          atm.data_entrega ? atm.data_entrega.split('T')[0] : '-',         // V: DATA DE ENTREGA
+          atm.status || '-',                                               // W: STATUS
+          atm.observacoes || '-',                                          // X: OBSERVAÇÕES
+          atm.valor_bid || atm.cotacao_bid || '',                          // Y: Valor BID
+          rotaStr,                                                         // Z: ROTA
+          mesText,                                                         // AA: Mês
+          mesAnoText,                                                      // AB: Mês Ano
+          "",                                                              // AC: Coluna 1
+          "",                                                              // AD: Coluna 2
+          atm.tipo_documento || '-',                                       // AE: TIPO
+          atm.data_mapeamento ? atm.data_mapeamento.split('T')[0] : '-',   // AF: DATA MAPEAMENTO
+          atm.fatura_cte || '-',                                           // AG: CTE
+          atm.valor || '',                                                 // AH: VALOR
+          atm.data_emissao ? atm.data_emissao.split('T')[0] : '-',         // AI: DATA EMISSÃO
+          atm.vencimento ? atm.vencimento.split('T')[0] : '-',             // AJ: VENCIMENTO
+          atm.elemento_pep_cc_wbs || '-',                                  // AK: ELEMENTO PEP - CC / WBS
+          atm.validacao_pep || '-',                                        // AL: VALIDAÇÃO PEP
+          "",                                                              // AM: Lançamento E-gate
+          "",                                                              // AN: ID E-gate
+          atm.registrado_sap || '-',                                       // AO: Registrado SAP (S/N)
+          "",                                                              // AP: FRS
+          atm.lancamento_fi || '-',                                        // AQ: Lançamento FI (S/N)
+          atm.processo_lancamento_fi || '-'                                // AR: Processo lançamento FI
+        ];
+      });
+
+      // 5. Escreve os dados na aba alvo, iniciando da célula A5 (preserva as 4 primeiras linhas do arquivo base)
+      XLSX.utils.sheet_add_aoa(worksheet, dadosMatriz, { origin: "A5" });
+
+      // 6. Faz o download do arquivo alterado
+      XLSX.writeFile(workbook, "Gestao_de_Fretes_Atualizada.xlsx");
+      
+    } catch (error) {
+      console.error("Falha ao exportar excel: ", error);
+      alert("Houve um problema ao gerar o arquivo. Veja o console (F12) para detalhes.");
+    }
   };
 
   return (
