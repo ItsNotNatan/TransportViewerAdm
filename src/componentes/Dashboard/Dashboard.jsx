@@ -1,9 +1,8 @@
 // src/componentes/Dashboard/Dashboard.jsx
 import React, { useState } from 'react';
 import Filtro from '../Filtro/Filtro'; 
-import * as XLSX from 'xlsx';
-
-import templateExcel from '../../../public/GestaoFretesTemplate.xlsx';
+import ExcelJS from 'exceljs';       // <-- Nova biblioteca de excel
+import { saveAs } from 'file-saver'; // <-- Biblioteca para fazer o download
 
 // --- Ícones SVG ---
 const TableList = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="3" x2="21" y1="15" y2="15"/><line x1="9" x2="9" y1="9" y2="21"/></svg>;
@@ -31,11 +30,11 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
     return dataStr;
   };
 
-// Lógica de Filtragem Avançada
+  // Lógica de Filtragem Avançada
   const atmsFiltrados = atms.filter(atm => {
     const idCurtoAtm = shortId(atm.id);
     const atmNum = atm.numero_atm ? String(atm.numero_atm).toUpperCase().trim() : '';
-    const valorComparacao = atmNum || idCurtoAtm; // Usa o numero_atm se existir, senão usa o UUID curto
+    const valorComparacao = atmNum || idCurtoAtm;
 
     let matchId = true;
 
@@ -43,27 +42,20 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
       const busca = filtros.id.toUpperCase().trim();
       
       if (busca.includes(',')) {
-        // 1. MÚLTIPLOS ESPECÍFICOS (Ex: 10200, 10205, 10210)
         const termos = busca.split(',').map(t => t.trim()).filter(t => t);
         matchId = termos.some(termo => idCurtoAtm.includes(termo) || atmNum.includes(termo));
-        
       } else if (busca.includes('-')) {
-        // 2. INTERVALO DE LOTE (Ex: 10200 - 10210)
         const [inicio, fim] = busca.split('-').map(t => t.trim());
-        
         if (inicio && fim) {
-          // Se forem números (ex: ATMs 10200 e 10210), compara matematicamente
           if (!isNaN(inicio) && !isNaN(fim) && !isNaN(valorComparacao)) {
             matchId = Number(valorComparacao) >= Number(inicio) && Number(valorComparacao) <= Number(fim);
           } else {
-            // Se tiverem letras, compara pela ordem alfabética
             matchId = valorComparacao >= inicio && valorComparacao <= fim;
           }
         } else {
           matchId = idCurtoAtm.includes(busca) || atmNum.includes(busca);
         }
       } else {
-        // 3. BUSCA NORMAL (Ex: apenas 10200)
         matchId = idCurtoAtm.includes(busca) || atmNum.includes(busca);
       }
     }
@@ -82,7 +74,7 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
   };
 
   // ========================================================
-  // LÓGICA DE EXPORTAÇÃO PARA EXCEL MODO "TEMPLATE"
+  // LÓGICA DE EXPORTAÇÃO CRIANDO EXCEL DO ZERO (EXCELJS)
   // ========================================================
   const exportarExcel = async () => {
     if (atmsFiltrados.length === 0) {
@@ -91,40 +83,93 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
     }
 
     try {
-      // 1. Busca o arquivo template na pasta 'public'
-      // ATENÇÃO: O arquivo precisa estar na pasta public do seu projeto e se chamar GestaoFretesTemplate.xlsx
-      // Onde estava: fetch('/GestaoFretesTemplate.xlsx')
-const response = await fetch(templateExcel);
+      // 1. Cria o ficheiro na memória
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('ATM');
+
+      // 2. Cria os "Super Cabeçalhos" (como no seu original)
+      worksheet.getCell('AA1').value = 'Controle de Ctes/ Nfe de Serviço';
+      worksheet.getCell('AA1').font = { bold: true, size: 14 };
+      worksheet.getCell('AA1').alignment = { horizontal: 'center' };
       
-      if (!response.ok) {
-        alert("Template não encontrado! Certifique-se de que o arquivo 'GestaoFretesTemplate.xlsx' está na pasta 'public' do seu projeto.");
-        return;
-      }
-      
-      const arrayBuffer = await response.arrayBuffer();
+      worksheet.getCell('D2').value = 'Gestão de Fretes';
+      worksheet.getCell('D2').font = { bold: true, size: 16 };
 
-      // 2. Lê o arquivo excel completo, preservando todas as abas
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      // 3. Define a largura exata de cada coluna (da A até à AR)
+      worksheet.columns = [
+        { key: 'data_sol', width: 22 },           // A: DATA DA SOLICITAÇÃO
+        { key: 'atm', width: 12 },                // B: ATM
+        { key: 'pedido', width: 20 },             // C: PEDIDO DE COMPRA
+        { key: 'nf', width: 15 },                 // D: NF
+        { key: 'wbs', width: 15 },                // E: WBS
+        { key: 'uf1', width: 6 },                 // F: UF
+        { key: 'mun1', width: 20 },               // G: MUNICIPIO
+        { key: 'coleta', width: 30 },             // H: LOCAL DE COLETA
+        { key: 'x', width: 4 },                   // I: X
+        { key: 'entrega', width: 30 },            // J: LOCAL DA ENTREGA
+        { key: 'uf2', width: 6 },                 // K: UF 2
+        { key: 'mun2', width: 20 },               // L: MUNICIPIO 2
+        { key: 'tipo_frete', width: 22 },         // M: Fracionado/Dedicado
+        { key: 'solicitacao', width: 20 },        // N: SOLICITAÇÃO
+        { key: 'veiculo', width: 20 },            // O: VEÍCULO
+        { key: 'transportadora', width: 25 },     // P: TRANSPORTADORA
+        { key: 'cotacao', width: 15 },            // Q: COTAÇÃO/BID
+        { key: 'valor_nf', width: 15 },           // R: VALOR NF
+        { key: 'volume', width: 12 },             // S: VOLUME
+        { key: 'peso', width: 12 },               // T: PESO
+        { key: 'valor_previsto', width: 22 },     // U: Valor previsto do frete
+        { key: 'col1', width: 12 },               // V: Column1
+        { key: 'status', width: 15 },             // W: STATUS
+        { key: 'obs', width: 35 },                // X: OBSERVAÇÕES
+        { key: 'valor_bid', width: 15 },          // Y: Valor BID
+        { key: 'rota', width: 40 },               // Z: ROTA
+        { key: 'mes', width: 15 },                // AA: Mês
+        { key: 'mes_ano', width: 15 },            // AB: Mês Ano
+        { key: 'col_a', width: 10 },              // AC: Coluna 1
+        { key: 'col_b', width: 10 },              // AD: Coluna 2
+        { key: 'tipo_doc', width: 15 },           // AE: TIPO
+        { key: 'data_map', width: 18 },           // AF: DATA MAPEAMENTO
+        { key: 'fatura', width: 15 },             // AG: FATURA
+        { key: 'valor', width: 15 },              // AH: VALOR
+        { key: 'data_emissao', width: 15 },       // AI: DATA EMISSÃO
+        { key: 'vencimento', width: 15 },         // AJ: VENCIMENTO
+        { key: 'elemento_pep', width: 25 },       // AK: ELEMENTO PEP - CC / WBS
+        { key: 'validacao_pep', width: 25 },      // AL: VALIDAÇÃO PEP - CC /WBS
+        { key: 'lancamento_v360', width: 20 },    // AM: Lançamento V360
+        { key: 'id_v360', width: 15 },            // AN: Id V360
+        { key: 'registrado_sap', width: 22 },     // AO: Registrado SAP (S/N)
+        { key: 'registro_sap', width: 18 },       // AP: Registro SAP
+        { key: 'lancamento_fi', width: 22 },      // AQ: Lançamento FI (S/N)
+        { key: 'processo_fi', width: 25 }         // AR: Processo lançamento FI
+      ];
 
-      // 3. Define a aba alvo
-      const abaNome = "ATM";
-      const worksheet = workbook.Sheets[abaNome];
+      // 4. Escreve os cabeçalhos das colunas (exatamente na Linha 4)
+      const titulos = [
+        "DATA DA SOLICITAÇÃO", "ATM", "PEDIDO DE COMPRA", "NF", "WBS", "UF", "MUNICIPIO", "LOCAL DE COLETA", "X", 
+        "LOCAL DA ENTREGA", "UF 2", "MUNICIPIO 2", "Fracionado/Dedicado", "SOLICITAÇÃO", "VEÍCULO", "TRANSPORTADORA", 
+        "COTAÇÃO/BID", "VALOR NF", "VOLUME", "PESO", "Valor previsto do frete", "Column1", "STATUS", "OBSERVAÇÕES", 
+        "Valor BID", "ROTA", "Mês", "Mês Ano", "Coluna 1", "Coluna 2", "TIPO", "DATA MAPEAMENTO", "FATURA", "VALOR", 
+        "DATA EMISSÃO", "VENCIMENTO", "ELEMENTO PEP - CC / WBS", "VALIDAÇÃO PEP - CC /WBS", "Lançamento V360", 
+        "Id V360", "Registrado SAP (S/N)", "Registro SAP", "Lançamento FI (S/N)", "Processo lançamento FI"
+      ];
 
-      if (!worksheet) {
-        alert(`A aba "${abaNome}" não foi encontrada no template.`);
-        return;
-      }
+      const linhaCabecalho = worksheet.getRow(4);
+      linhaCabecalho.values = titulos;
 
-      // 4. Mapeia os dados filtrados em uma Matriz (Array de Arrays)
-      // A ordem deve seguir rigorosamente as colunas de A a AR do template.
-      const dadosMatriz = atmsFiltrados.map(atm => {
-        
-        // Formata a Rota
+      // 5. Estiliza o cabeçalho
+      linhaCabecalho.eachCell((cell) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+        cell.font = { color: { argb: 'FFFFFFFF' }, bold: true }; 
+        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      });
+      linhaCabecalho.height = 35;
+
+      // 6. Insere os dados dos ATMs filtrados
+      atmsFiltrados.forEach(atm => {
         const rotaStr = (atm.origem?.municipio && atm.destino?.municipio) 
-          ? `${atm.origem.uf} ${atm.origem.municipio} x ${atm.destino.municipio} ${atm.destino.uf}`
-          : '-';
+          ? `${atm.origem.uf} ${atm.origem.municipio} x ${atm.destino.municipio} ${atm.destino.uf}` : '-';
 
-        // Lógica simples para pegar Mês e Ano
         let mesText = '-';
         let mesAnoText = '-';
         if (atm.data_solicitacao) {
@@ -134,60 +179,65 @@ const response = await fetch(templateExcel);
           mesAnoText = `${date.getFullYear()} ${mesText}`;
         }
 
-        return [
-          atm.data_solicitacao ? atm.data_solicitacao.split('T')[0] : '-', // A: DATA DA SOLICITAÇÃO
-          atm.numero_atm || shortId(atm.id),                               // B: ATM
-          atm.pedido_compra || '-',                                        // C: PEDIDO DE COMPRA
-          atm.nf || '-',                                                   // D: NF
-          atm.wbs || '-',                                                  // E: WBS
-          atm.origem?.uf || '-',                                           // F: UF
-          atm.origem?.municipio || '-',                                    // G: MUNICIPIO
-          atm.origem?.nome_local || '-',                                   // H: LOCAL DE COLETA
-          "x",                                                             // I: X
-          atm.destino?.nome_local || '-',                                  // J: LOCAL DA ENTREGA
-          atm.destino?.uf || '-',                                          // K: UF 2
-          atm.destino?.municipio || '-',                                   // L: MUNICIPIO 2
-          atm.tipo_frete || '-',                                           // M: Fracionado/Dedicado
-          atm.solicitacao || '-',                                          // N: SOLICITAÇÃO
-          atm.veiculo || atm.modal || '-',                                 // O: VEÍCULO
-          atm.transportadora?.nome || '-',                                 // P: TRANSPORTADORA
-          atm.cotacao_bid ? "Cotação" : (atm.valor_bid ? "BID" : '-'),     // Q: COTAÇÃO/BID
-          atm.valor_nf || '',                                              // R: VALOR NF
-          atm.volume || '',                                                // S: VOLUME
-          atm.peso || '',                                                  // T: PESO
-          atm.valor_bid_dedicado || '',                                    // U: VALOR BID (Dedicado)
-          atm.data_entrega ? atm.data_entrega.split('T')[0] : '-',         // V: DATA DE ENTREGA
-          atm.status || '-',                                               // W: STATUS
-          atm.observacoes || '-',                                          // X: OBSERVAÇÕES
-          atm.valor_bid || atm.cotacao_bid || '',                          // Y: Valor BID
-          rotaStr,                                                         // Z: ROTA
-          mesText,                                                         // AA: Mês
-          mesAnoText,                                                      // AB: Mês Ano
-          "",                                                              // AC: Coluna 1
-          "",                                                              // AD: Coluna 2
-          atm.tipo_documento || '-',                                       // AE: TIPO
-          atm.data_mapeamento ? atm.data_mapeamento.split('T')[0] : '-',   // AF: DATA MAPEAMENTO
-          atm.fatura_cte || '-',                                           // AG: CTE
-          atm.valor || '',                                                 // AH: VALOR
-          atm.data_emissao ? atm.data_emissao.split('T')[0] : '-',         // AI: DATA EMISSÃO
-          atm.vencimento ? atm.vencimento.split('T')[0] : '-',             // AJ: VENCIMENTO
-          atm.elemento_pep_cc_wbs || '-',                                  // AK: ELEMENTO PEP - CC / WBS
-          atm.validacao_pep || '-',                                        // AL: VALIDAÇÃO PEP
-          "",                                                              // AM: Lançamento E-gate
-          "",                                                              // AN: ID E-gate
-          atm.registrado_sap || '-',                                       // AO: Registrado SAP (S/N)
-          "",                                                              // AP: FRS
-          atm.lancamento_fi || '-',                                        // AQ: Lançamento FI (S/N)
-          atm.processo_lancamento_fi || '-'                                // AR: Processo lançamento FI
-        ];
+        const row = worksheet.addRow({
+          data_sol: atm.data_solicitacao ? atm.data_solicitacao.split('T')[0] : '-',
+          atm: atm.numero_atm || shortId(atm.id),
+          pedido: atm.pedido_compra || '-',
+          nf: atm.nf || '-',
+          wbs: atm.wbs || '-',
+          uf1: atm.origem?.uf || '-',
+          mun1: atm.origem?.municipio || '-',
+          coleta: atm.origem?.nome_local || '-',
+          x: 'x',
+          entrega: atm.destino?.nome_local || '-',
+          uf2: atm.destino?.uf || '-',
+          mun2: atm.destino?.municipio || '-',
+          tipo_frete: atm.tipo_frete || '-',
+          solicitacao: atm.solicitacao || '-',
+          veiculo: atm.veiculo || atm.modal || '-',
+          transportadora: atm.transportadora?.nome || '-',
+          cotacao: atm.cotacao_bid ? "Cotação" : (atm.valor_bid ? "BID" : '-'),
+          valor_nf: atm.valor_nf || '',
+          volume: atm.volume || '',
+          peso: atm.peso || '',
+          valor_previsto: atm.valor_bid_dedicado || '',
+          col1: '',
+          status: atm.status || '-',
+          obs: atm.observacoes || '-',
+          valor_bid: atm.valor_bid || atm.cotacao_bid || '',
+          rota: rotaStr,
+          mes: mesText,
+          mes_ano: mesAnoText,
+          col_a: '',
+          col_b: '',
+          tipo_doc: atm.tipo_documento || '-',
+          data_map: atm.data_mapeamento ? atm.data_mapeamento.split('T')[0] : '-',
+          fatura: atm.fatura_cte || '-',
+          valor: atm.valor || '',
+          data_emissao: atm.data_emissao ? atm.data_emissao.split('T')[0] : '-',
+          vencimento: atm.vencimento ? atm.vencimento.split('T')[0] : '-',
+          elemento_pep: atm.elemento_pep_cc_wbs || '-',
+          validacao_pep: atm.validacao_pep || '-',
+          lancamento_v360: '',
+          id_v360: '',
+          registrado_sap: atm.registrado_sap || '-',
+          registro_sap: atm.registro_sap || '-',
+          lancamento_fi: atm.lancamento_fi || '-',
+          processo_fi: atm.processo_lancamento_fi || '-'
+        });
+
+        // Estiliza as linhas com os dados
+        row.eachCell((cell) => {
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.border = { top: { style: 'thin', color: { argb: 'FFE5E7EB' } }, bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } } };
+        });
       });
 
-      // 5. Escreve os dados na aba alvo, iniciando da célula A5 (preserva as 4 primeiras linhas do arquivo base)
-      XLSX.utils.sheet_add_aoa(worksheet, dadosMatriz, { origin: "A5" });
+      // 7. Salva e inicia o download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, "Gestao_de_Fretes.xlsx");
 
-      // 6. Faz o download do arquivo alterado
-      XLSX.writeFile(workbook, "Gestao_de_Fretes_Atualizada.xlsx");
-      
     } catch (error) {
       console.error("Falha ao exportar excel: ", error);
       alert("Houve um problema ao gerar o arquivo. Veja o console (F12) para detalhes.");
@@ -223,7 +273,7 @@ const response = await fetch(templateExcel);
         />
       </div>
       
-      {/* TABELA DE DADOS NA TELA (Resumo visual, não muda) */}
+      {/* TABELA DE DADOS NA TELA */}
       <div className="table-container" style={{ overflowX: 'auto' }}>
         <table className="data-table" style={{ whiteSpace: 'nowrap', width: '100%' }}>
           <thead>

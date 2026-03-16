@@ -1,6 +1,7 @@
+// src/componentes/BtnPdf/BtnPdf.jsx
 import React, { useRef, useState } from 'react';
 import html2pdf from 'html2pdf.js';
-import ModeloPDF from '../ModeloPDF/ModeloPDF'; // Importando o modelo do PDF
+import ModeloPDF from '../ModeloPDF/ModeloPDF';
 
 const FileText = ({ size = 24 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -18,31 +19,35 @@ export default function BtnPdf({ atm }) {
     setGerando(true);
     const element = pdfRef.current;
     
-    // Removida a linha que mudava o display para 'block'
+    // Nome do ficheiro mais inteligente (usa o numero_atm se existir)
+    const idNome = atm.numero_atm ? String(atm.numero_atm) : atm.id?.substring(0, 8).toUpperCase();
 
     const opt = {
       margin:       10, 
-      filename:     `ATM_${atm.id?.substring(0, 8).toUpperCase()}_Autorizacao.pdf`,
+      filename:     `ATM_${idNome}_Autorizacao.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, windowWidth: 850 }, 
+      html2canvas:  { scale: 2, useCORS: true, logging: false }, 
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
     try {
+      // Como o elemento não está em display:none, o html2pdf consegue capturá-lo diretamente!
       await html2pdf().from(element).set(opt).save();
+    } catch (erro) {
+      console.error("Erro ao gerar PDF:", erro);
+      alert("Houve um erro ao gerar o PDF.");
     } finally {
-      // Removida a linha que mudava o display para 'none'
       setGerando(false);
     }
   };
 
   return (
     <>
-      <button className="btn-danger" onClick={gerarPDF} disabled={gerando}>
-        <FileText size={18}/> {gerando ? 'Gerando...' : 'Gerar PDF Oficial'}
+      <button className="btn-danger" onClick={gerarPDF} disabled={gerando} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <FileText size={18}/> {gerando ? 'A Gerar Documento...' : 'Gerar PDF Oficial'}
       </button>
 
-      {/* Renderiza o modelo fora da tela */}
+      {/* Renderiza o modelo escondido na tela */}
       <ModeloPDF ref={pdfRef} atm={atm} />
     </>
   );

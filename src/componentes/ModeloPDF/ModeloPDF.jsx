@@ -1,20 +1,27 @@
+// src/componentes/ModeloPDF/ModeloPDF.jsx
 import React, { forwardRef } from 'react';
-import logoComau from '../../assets/logo-comau.png';
+import logoComau from '../../assets/logo-comau.png'; // Verifique se este caminho está correto no seu projeto
 
 const ModeloPDF = forwardRef(({ atm }, ref) => {
   if (!atm) return null;
 
   const shortId = (id) => id ? id.substring(0, 8).toUpperCase() : 'N/A';
+  const idExibicao = atm.numero_atm || shortId(atm.id);
+
+  // Melhorada a função de data para lidar com o "T" caso venha do banco de dados
   const formatarData = (dataStr) => {
     if (!dataStr) return '';
-    const partes = dataStr.split('-');
+    const partes = dataStr.split('T')[0].split('-');
     if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
     return dataStr;
   };
 
   return (
-    <div style={{ display: 'none' }}>
-      <div ref={ref} style={{ width: '100%', maxWidth: '800px', padding: '30px 40px', backgroundColor: 'white', color: 'black', fontFamily: 'sans-serif', boxSizing: 'border-box' }}>
+    // A GRANDE MÁGICA DE CSS AQUI: Oculta da visão do utilizador, mas deixa o HTML visível para a biblioteca fotograr
+    <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+      
+      {/* O width fixo em 800px garante que o PDF nunca sai esmagado, não importa o tamanho do ecrã do utilizador */}
+      <div ref={ref} style={{ width: '800px', padding: '30px 40px', backgroundColor: 'white', color: 'black', fontFamily: 'sans-serif', boxSizing: 'border-box' }}>
         
         {/* Cabeçalho */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -30,7 +37,7 @@ const ModeloPDF = forwardRef(({ atm }, ref) => {
 
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div style={{ display: 'inline-block', border: '2px solid black', padding: '6px 14px', fontSize: '16px', fontWeight: 'bold' }}>
-            N° ATM: {shortId(atm.id)}
+            N° ATM: {idExibicao}
           </div>
         </div>
 
@@ -49,7 +56,7 @@ const ModeloPDF = forwardRef(({ atm }, ref) => {
           <h4 style={{ fontWeight: 'bold', fontSize: '15px', backgroundColor: '#f3f4f6', border: '1px solid black', padding: '6px 8px', marginBottom: '10px', margin: 0 }}>2. LOCAL DA COLETA (ORIGEM)</h4>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', padding: '0 10px', marginTop: '8px', boxSizing: 'border-box', fontSize: '14px' }}>
             <div style={{ borderBottom: '1px solid black', paddingBottom: '2px' }}><strong>Endereço de Coleta:</strong> {atm.origem?.nome_local}, {atm.origem?.municipio}-{atm.origem?.uf}</div>
-            <div style={{ borderBottom: '1px solid black', paddingBottom: '2px' }}><strong>Data Previsão:</strong> {formatarData(atm.created_at?.split('T')[0])}</div>
+            <div style={{ borderBottom: '1px solid black', paddingBottom: '2px' }}><strong>Data Previsão:</strong> {formatarData(atm.data_solicitacao)}</div>
           </div>
         </div>
 
