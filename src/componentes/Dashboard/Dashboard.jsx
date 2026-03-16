@@ -31,12 +31,47 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
     return dataStr;
   };
 
+// Lógica de Filtragem Avançada
   const atmsFiltrados = atms.filter(atm => {
     const idCurtoAtm = shortId(atm.id);
-    const matchId = !filtros.id || idCurtoAtm.includes(filtros.id.toUpperCase().trim());
+    const atmNum = atm.numero_atm ? String(atm.numero_atm).toUpperCase().trim() : '';
+    const valorComparacao = atmNum || idCurtoAtm; // Usa o numero_atm se existir, senão usa o UUID curto
+
+    let matchId = true;
+
+    if (filtros.id) {
+      const busca = filtros.id.toUpperCase().trim();
+      
+      if (busca.includes(',')) {
+        // 1. MÚLTIPLOS ESPECÍFICOS (Ex: 10200, 10205, 10210)
+        const termos = busca.split(',').map(t => t.trim()).filter(t => t);
+        matchId = termos.some(termo => idCurtoAtm.includes(termo) || atmNum.includes(termo));
+        
+      } else if (busca.includes('-')) {
+        // 2. INTERVALO DE LOTE (Ex: 10200 - 10210)
+        const [inicio, fim] = busca.split('-').map(t => t.trim());
+        
+        if (inicio && fim) {
+          // Se forem números (ex: ATMs 10200 e 10210), compara matematicamente
+          if (!isNaN(inicio) && !isNaN(fim) && !isNaN(valorComparacao)) {
+            matchId = Number(valorComparacao) >= Number(inicio) && Number(valorComparacao) <= Number(fim);
+          } else {
+            // Se tiverem letras, compara pela ordem alfabética
+            matchId = valorComparacao >= inicio && valorComparacao <= fim;
+          }
+        } else {
+          matchId = idCurtoAtm.includes(busca) || atmNum.includes(busca);
+        }
+      } else {
+        // 3. BUSCA NORMAL (Ex: apenas 10200)
+        matchId = idCurtoAtm.includes(busca) || atmNum.includes(busca);
+      }
+    }
+
     const matchSolicitante = !filtros.solicitante || atm.solicitacao?.toLowerCase().includes(filtros.solicitante.toLowerCase().trim());
     const matchPedido = !filtros.pedido || atm.pedido_compra?.toLowerCase().includes(filtros.pedido.toLowerCase().trim());
     const matchNf = !filtros.nf || atm.nf?.toLowerCase().includes(filtros.nf.toLowerCase().trim());
+    
     return matchId && matchSolicitante && matchPedido && matchNf;
   });
 
