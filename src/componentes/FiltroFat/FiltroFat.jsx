@@ -11,14 +11,21 @@ const X = ({ size = 24 }) => (
 );
 
 export default function FiltroFat({ atms, filtros, onFiltroChange, onLimpar, aberto, onClose }) {
+  // ESTADOS DOS MODOS DE PESQUISA
   const [modoFatura, setModoFatura] = useState('especifico');
   const [modoPep, setModoPep] = useState('especifico');
+  const [modoDataMap, setModoDataMap] = useState('lote');
+  const [modoDataEmi, setModoDataEmi] = useState('lote');
+  const [modoDataVenc, setModoDataVenc] = useState('lote');
 
   const opcoesFiltro = useMemo(() => {
     const faturas = new Set();
     const peps = new Set();
     const tiposDoc = new Set();
     const validacoes = new Set();
+    const datasMap = new Set();
+    const datasEmi = new Set();
+    const datasVenc = new Set();
 
     atms.forEach(atm => {
       if (atm.fatura_cte) faturas.add(atm.fatura_cte.trim());
@@ -26,29 +33,45 @@ export default function FiltroFat({ atms, filtros, onFiltroChange, onLimpar, abe
       else if (atm.wbs) peps.add(atm.wbs.trim());
       if (atm.tipo_documento) tiposDoc.add(atm.tipo_documento.trim());
       if (atm.validacao_pep) validacoes.add(atm.validacao_pep.trim());
+      
+      // Coletando datas
+      if (atm.data_mapeamento) datasMap.add(atm.data_mapeamento.split('T')[0]);
+      if (atm.data_emissao) datasEmi.add(atm.data_emissao.split('T')[0]);
+      if (atm.vencimento) datasVenc.add(atm.vencimento.split('T')[0]);
     });
 
     const formatarOpcoes = (set) => Array.from(set).filter(Boolean).sort().map(item => ({ value: item, label: item }));
+    
+    const formatarData = (set) => Array.from(set).filter(Boolean).sort().map(d => {
+      const [ano, mes, dia] = d.split('-');
+      return { value: d, label: `${dia}/${mes}/${ano}` };
+    });
 
     return {
       faturas: formatarOpcoes(faturas),
       peps: formatarOpcoes(peps),
       tiposDoc: formatarOpcoes(tiposDoc),
-      validacoes: formatarOpcoes(validacoes)
+      validacoes: formatarOpcoes(validacoes),
+      datasMap: formatarData(datasMap),
+      datasEmi: formatarData(datasEmi),
+      datasVenc: formatarData(datasVenc)
     };
   }, [atms]);
 
   const temFiltroAtivo = [
     filtros.fatura, filtros.elemento_pep, filtros.registrado_sap, 
     filtros.tipo_documento, filtros.validacao_pep,
-    filtros.data_map_inicio, filtros.data_map_fim,
-    filtros.data_emissao_inicio, filtros.data_emissao_fim,
-    filtros.data_venc_inicio, filtros.data_venc_fim
+    filtros.data_map_inicio, filtros.data_map_fim, filtros.data_map_especifica,
+    filtros.data_emissao_inicio, filtros.data_emissao_fim, filtros.data_emi_especifica,
+    filtros.data_venc_inicio, filtros.data_venc_fim, filtros.data_venc_especifica
   ].some(valor => valor !== '' && valor !== undefined);
 
   const alternarModo = (campo, modo) => {
     if (campo === 'fatura') { setModoFatura(modo); onFiltroChange({ target: { name: 'fatura', value: '' } }); }
     if (campo === 'pep') { setModoPep(modo); onFiltroChange({ target: { name: 'elemento_pep', value: '' } }); }
+    if (campo === 'data_map') { setModoDataMap(modo); onFiltroChange({ target: { name: 'data_map_inicio', value: '' } }); onFiltroChange({ target: { name: 'data_map_fim', value: '' } }); onFiltroChange({ target: { name: 'data_map_especifica', value: '' } }); }
+    if (campo === 'data_emi') { setModoDataEmi(modo); onFiltroChange({ target: { name: 'data_emissao_inicio', value: '' } }); onFiltroChange({ target: { name: 'data_emissao_fim', value: '' } }); onFiltroChange({ target: { name: 'data_emi_especifica', value: '' } }); }
+    if (campo === 'data_venc') { setModoDataVenc(modo); onFiltroChange({ target: { name: 'data_venc_inicio', value: '' } }); onFiltroChange({ target: { name: 'data_venc_fim', value: '' } }); onFiltroChange({ target: { name: 'data_venc_especifica', value: '' } }); }
   };
 
   const handleMultiSelectChange = (name, selectedOptions) => {
@@ -69,6 +92,14 @@ export default function FiltroFat({ atms, filtros, onFiltroChange, onLimpar, abe
   const getMultiValue = (str) => {
     if (!str) return [];
     return str.split(',').filter(Boolean).map(v => ({ value: v.trim(), label: v.trim() }));
+  };
+
+  const getMultiValueData = (str) => {
+    if (!str) return [];
+    return str.split(',').filter(Boolean).map(v => {
+      const [ano, mes, dia] = v.trim().split('-');
+      return { value: v.trim(), label: `${dia}/${mes}/${ano}` };
+    });
   };
 
   const getRangeValues = (campo, modo) => {
@@ -153,36 +184,74 @@ export default function FiltroFat({ atms, filtros, onFiltroChange, onLimpar, abe
               )}
             </div>
 
-            {/* BLOCO: DATAS (MAPEAMENTO, EMISSÃO E VENCIMENTO) */}
-            <div style={{ gridColumn: 'span 2', backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-              
-              <div>
-                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', display: 'block', marginBottom: '0.4rem' }}>Data Mapeamento</label>
-                <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
-                  <input type="date" name="data_map_inicio" value={filtros.data_map_inicio || ''} onChange={onFiltroChange} style={{...inputStyle, padding: '0.3rem'}} />
-                  <span style={{ color: '#6b7280', fontSize: '0.7rem', fontWeight: 'bold' }}>a</span>
-                  <input type="date" name="data_map_fim" value={filtros.data_map_fim || ''} onChange={onFiltroChange} style={{...inputStyle, padding: '0.3rem'}} />
+            {/* BLOCO: DATA MAPEAMENTO */}
+            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', margin: 0 }}>Data Mapeamento</label>
+                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                  <button type="button" onClick={() => alternarModo('data_map', 'especifico')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataMap === 'especifico' ? '#ecfdf5' : 'white', borderColor: modoDataMap === 'especifico' ? '#10b981' : '#d1d5db', color: modoDataMap === 'especifico' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataMap === 'especifico' ? 'bold' : 'normal' }}>Específicos</button>
+                  <button type="button" onClick={() => alternarModo('data_map', 'lote')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataMap === 'lote' ? '#ecfdf5' : 'white', borderColor: modoDataMap === 'lote' ? '#10b981' : '#d1d5db', color: modoDataMap === 'lote' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataMap === 'lote' ? 'bold' : 'normal' }}>Intervalo</button>
                 </div>
-              </div>
+               </div>
+               {modoDataMap === 'especifico' ? (
+                 <Select isMulti options={opcoesFiltro.datasMap} value={getMultiValueData(filtros.data_map_especifica)} onChange={(opts) => handleMultiSelectChange('data_map_especifica', opts)} placeholder="Selecionar dias..." styles={selectStyles} noOptionsMessage={() => "Nenhuma data"} />
+               ) : (
+                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div style={{ flex: 1 }}><input type="date" name="data_map_inicio" value={filtros.data_map_inicio || ''} onChange={onFiltroChange} style={inputStyle} /></div>
+                    <span style={{ color: '#6b7280', fontSize: '0.8rem', fontWeight: 'bold' }}>a</span>
+                    <div style={{ flex: 1 }}><input type="date" name="data_map_fim" value={filtros.data_map_fim || ''} onChange={onFiltroChange} style={inputStyle} /></div>
+                 </div>
+               )}
+            </div>
 
-              <div>
-                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', display: 'block', marginBottom: '0.4rem' }}>Data Emissão</label>
-                <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
-                  <input type="date" name="data_emissao_inicio" value={filtros.data_emissao_inicio || ''} onChange={onFiltroChange} style={{...inputStyle, padding: '0.3rem'}} />
-                  <span style={{ color: '#6b7280', fontSize: '0.7rem', fontWeight: 'bold' }}>a</span>
-                  <input type="date" name="data_emissao_fim" value={filtros.data_emissao_fim || ''} onChange={onFiltroChange} style={{...inputStyle, padding: '0.3rem'}} />
+            {/* BLOCO: DATA EMISSÃO */}
+            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', margin: 0 }}>Data Emissão</label>
+                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                  <button type="button" onClick={() => alternarModo('data_emi', 'especifico')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataEmi === 'especifico' ? '#ecfdf5' : 'white', borderColor: modoDataEmi === 'especifico' ? '#10b981' : '#d1d5db', color: modoDataEmi === 'especifico' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataEmi === 'especifico' ? 'bold' : 'normal' }}>Específicos</button>
+                  <button type="button" onClick={() => alternarModo('data_emi', 'lote')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataEmi === 'lote' ? '#ecfdf5' : 'white', borderColor: modoDataEmi === 'lote' ? '#10b981' : '#d1d5db', color: modoDataEmi === 'lote' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataEmi === 'lote' ? 'bold' : 'normal' }}>Intervalo</button>
                 </div>
-              </div>
+               </div>
+               {modoDataEmi === 'especifico' ? (
+                 <Select isMulti options={opcoesFiltro.datasEmi} value={getMultiValueData(filtros.data_emi_especifica)} onChange={(opts) => handleMultiSelectChange('data_emi_especifica', opts)} placeholder="Selecionar dias..." styles={selectStyles} noOptionsMessage={() => "Nenhuma data"} />
+               ) : (
+                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div style={{ flex: 1 }}><input type="date" name="data_emissao_inicio" value={filtros.data_emissao_inicio || ''} onChange={onFiltroChange} style={inputStyle} /></div>
+                    <span style={{ color: '#6b7280', fontSize: '0.8rem', fontWeight: 'bold' }}>a</span>
+                    <div style={{ flex: 1 }}><input type="date" name="data_emissao_fim" value={filtros.data_emissao_fim || ''} onChange={onFiltroChange} style={inputStyle} /></div>
+                 </div>
+               )}
+            </div>
 
-              <div>
-                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', display: 'block', marginBottom: '0.4rem' }}>Data Vencimento</label>
-                <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
-                  <input type="date" name="data_venc_inicio" value={filtros.data_venc_inicio || ''} onChange={onFiltroChange} style={{...inputStyle, padding: '0.3rem'}} />
-                  <span style={{ color: '#6b7280', fontSize: '0.7rem', fontWeight: 'bold' }}>a</span>
-                  <input type="date" name="data_venc_fim" value={filtros.data_venc_fim || ''} onChange={onFiltroChange} style={{...inputStyle, padding: '0.3rem'}} />
+            {/* BLOCO: DATA VENCIMENTO */}
+            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', margin: 0 }}>Data Vencimento</label>
+                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                  <button type="button" onClick={() => alternarModo('data_venc', 'especifico')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataVenc === 'especifico' ? '#ecfdf5' : 'white', borderColor: modoDataVenc === 'especifico' ? '#10b981' : '#d1d5db', color: modoDataVenc === 'especifico' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataVenc === 'especifico' ? 'bold' : 'normal' }}>Específicos</button>
+                  <button type="button" onClick={() => alternarModo('data_venc', 'lote')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataVenc === 'lote' ? '#ecfdf5' : 'white', borderColor: modoDataVenc === 'lote' ? '#10b981' : '#d1d5db', color: modoDataVenc === 'lote' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataVenc === 'lote' ? 'bold' : 'normal' }}>Intervalo</button>
                 </div>
-              </div>
+               </div>
+               {modoDataVenc === 'especifico' ? (
+                 <Select isMulti options={opcoesFiltro.datasVenc} value={getMultiValueData(filtros.data_venc_especifica)} onChange={(opts) => handleMultiSelectChange('data_venc_especifica', opts)} placeholder="Selecionar dias..." styles={selectStyles} noOptionsMessage={() => "Nenhuma data"} />
+               ) : (
+                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div style={{ flex: 1 }}><input type="date" name="data_venc_inicio" value={filtros.data_venc_inicio || ''} onChange={onFiltroChange} style={inputStyle} /></div>
+                    <span style={{ color: '#6b7280', fontSize: '0.8rem', fontWeight: 'bold' }}>a</span>
+                    <div style={{ flex: 1 }}><input type="date" name="data_venc_fim" value={filtros.data_venc_fim || ''} onChange={onFiltroChange} style={inputStyle} /></div>
+                 </div>
+               )}
+            </div>
 
+            {/* BLOCO: REGISTRADO SAP */}
+            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', display: 'block', marginBottom: '0.4rem' }}>Registrado SAP?</label>
+              <select name="registrado_sap" value={filtros.registrado_sap || ''} onChange={onFiltroChange} style={inputStyle}>
+                <option value="">Todos (Ignorar SAP)</option>
+                <option value="SIM">SIM (Já registrado)</option>
+                <option value="NÃO">NÃO (Pendente registro)</option>
+              </select>
             </div>
 
             {/* BLOCO: TIPO DOC E VALIDAÇÃO PEP */}
@@ -194,16 +263,6 @@ export default function FiltroFat({ atms, filtros, onFiltroChange, onLimpar, abe
             <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
               <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', display: 'block', marginBottom: '0.4rem' }}>Validação PEP</label>
               <Select isMulti options={opcoesFiltro.validacoes} value={getMultiValue(filtros.validacao_pep)} onChange={(opts) => handleMultiSelectChange('validacao_pep', opts)} placeholder="Ex: OK..." styles={selectStyles} />
-            </div>
-
-            {/* BLOCO: REGISTRADO SAP */}
-            <div style={{ gridColumn: 'span 2', backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', display: 'block', marginBottom: '0.4rem' }}>Registrado SAP?</label>
-              <select name="registrado_sap" value={filtros.registrado_sap || ''} onChange={onFiltroChange} style={inputStyle}>
-                <option value="">Todos (Ignorar SAP)</option>
-                <option value="SIM">SIM (Já registrado)</option>
-                <option value="NÃO">NÃO (Pendente registro)</option>
-              </select>
             </div>
 
           </div>
