@@ -52,22 +52,25 @@ export default function BtnPdf({ atm }) {
           { text: 'IDENTIFICAÇÃO', style: 'sectionTitle' },
           {
             table: {
-              widths: ['*'],
+              widths: [150, '*'],
               body: [
-                [{
-                  stack: [
-                    { text: [{ text: 'Solicitante: ', bold: true }, atm.solicitacao || 'N/A'], margin: [0, 2] },
-                    { text: [{ text: 'Data da Solicitação: ', bold: true }, formatarData(atm.data_solicitacao || atm.created_at)], margin: [0, 2] },
-                    { text: [{ text: 'Centro de Custo / WBS: ', bold: true }, atm.wbs || 'N/A'], margin: [0, 2] },
-                  ],
-                  margin: [5, 5, 5, 5]
-                }]
+                [
+                  { text: 'Solicitante:', bold: true, margin: [0, 5] },
+                  { text: atm.solicitacao || 'N/A', margin: [0, 5] }
+                ],
+                [
+                  { text: 'Data da Solicitação:', bold: true, margin: [0, 5] },
+                  { text: formatarData(atm.data_solicitacao || atm.created_at), margin: [0, 5] }
+                ],
+                [
+                  { text: 'Centro de Custo / WBS:', bold: true, margin: [0, 5] },
+                  { text: atm.wbs || 'N/A', margin: [0, 5] }
+                ]
               ]
-            },
-            layout: 'lightHorizontalLines'
+            }
           },
 
-          // COLETA (ORIGEM) [cite: 6, 7, 8]
+          // COLETA (ORIGEM) [cite: 6, 7, 8, 9, 10]
           { text: 'LOCAL DA COLETA (ORIGEM)', style: 'sectionTitle', margin: [0, 20, 0, 5] },
           {
             table: {
@@ -155,7 +158,7 @@ export default function BtnPdf({ atm }) {
           signatureLabel: { fontSize: 10, bold: true, margin: [0, 8, 0, 0] }
         },
         defaultStyle: { 
-          fontSize: 11, // Aumentado de 9 para 11
+          fontSize: 11,
           columnGap: 20 
         }
       };
