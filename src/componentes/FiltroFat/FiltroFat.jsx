@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import Select from 'react-select';
+import './FiltroFat.css'; // <-- Importando o novo arquivo CSS
 
 const XCircle = ({ size = 20, className = "" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
@@ -122,146 +123,145 @@ export default function FiltroFat({ atms, filtros, onFiltroChange, onLimpar, abe
     multiValueRemove: (base) => ({ ...base, color: '#065f46', ':hover': { backgroundColor: '#a7f3d0', color: '#064e3b' } }),
   };
 
-  const inputStyle = { width: '100%', padding: '0.55rem 0.75rem', borderRadius: '0.375rem', border: '1px solid #d1d5db', outline: 'none', backgroundColor: '#ffffff', color: '#111827' };
-
   if (!aberto) return null;
 
   return createPortal(
-    <div className="modal-overlay" style={{ zIndex: 9999, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="modal-content fade-in" style={{ maxWidth: '850px', width: '100%', backgroundColor: 'white', borderRadius: '0.5rem', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="filtro-modal-overlay">
+      <div className="filtro-modal-content fade-in">
         
-        <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', borderBottom: '1px solid #e5e7eb' }}>
+        <div className="filtro-modal-header">
           <div>
-            <span className="modal-subtitle" style={{ fontSize: '0.875rem', color: '#6b7280' }}>Refine sua busca financeira</span>
-            <h2 className="modal-title" style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold', color: '#047857' }}>Filtros de Faturamento</h2>
+            <span className="filtro-modal-subtitle">Refine sua busca financeira</span>
+            <h2 className="filtro-modal-title">Filtros de Faturamento</h2>
           </div>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '0.5rem', borderRadius: '0.375rem', transition: 'background-color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+          <button onClick={onClose} className="filtro-btn-close">
             <X size={24} />
           </button>
         </div>
 
-        <div className="modal-body" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
+        <div className="filtro-modal-body">
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="filtro-grid">
             
             {/* BLOCO: FATURA */}
-            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', margin: 0 }}>Fatura / CTe</label>
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  <button type="button" onClick={() => alternarModo('fatura', 'especifico')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoFatura === 'especifico' ? '#ecfdf5' : 'white', borderColor: modoFatura === 'especifico' ? '#10b981' : '#d1d5db', color: modoFatura === 'especifico' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoFatura === 'especifico' ? 'bold' : 'normal' }}>Específicas</button>
-                  <button type="button" onClick={() => alternarModo('fatura', 'lote')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoFatura === 'lote' ? '#ecfdf5' : 'white', borderColor: modoFatura === 'lote' ? '#10b981' : '#d1d5db', color: modoFatura === 'lote' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoFatura === 'lote' ? 'bold' : 'normal' }}>Intervalo</button>
+            <div className="filtro-bloco">
+              <div className="filtro-bloco-header">
+                <label className="filtro-label">Fatura</label>
+                <div className="filtro-btn-group">
+                  <button type="button" onClick={() => alternarModo('fatura', 'especifico')} className={`filtro-btn-modo ${modoFatura === 'especifico' ? 'ativo' : ''}`}>Específicas</button>
+                  <button type="button" onClick={() => alternarModo('fatura', 'lote')} className={`filtro-btn-modo ${modoFatura === 'lote' ? 'ativo' : ''}`}>Intervalo</button>
                 </div>
               </div>
               {modoFatura === 'especifico' ? (
                 <Select isMulti options={opcoesFiltro.faturas} value={getMultiValue(filtros.fatura)} onChange={(opts) => handleMultiSelectChange('fatura', opts)} placeholder="Selecionar Faturas..." styles={selectStyles} />
               ) : (
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <div style={{ flex: 1 }}><Select options={opcoesFiltro.faturas} value={rangeFatura.currentDe} onChange={(opt) => handleRangeChange('fatura', 'de', opt)} placeholder="De" styles={selectStyles} isClearable /></div>
-                  <span style={{ color: '#6b7280', fontSize: '0.8rem', fontWeight: 'bold' }}>até</span>
-                  <div style={{ flex: 1 }}><Select options={opcoesFiltro.faturas} value={rangeFatura.currentAte} onChange={(opt) => handleRangeChange('fatura', 'ate', opt)} placeholder="Até" styles={selectStyles} isClearable /></div>
+                <div className="filtro-range-container">
+                  <div className="filtro-range-item"><Select options={opcoesFiltro.faturas} value={rangeFatura.currentDe} onChange={(opt) => handleRangeChange('fatura', 'de', opt)} placeholder="De" styles={selectStyles} isClearable /></div>
+                  <span className="filtro-range-sep">até</span>
+                  <div className="filtro-range-item"><Select options={opcoesFiltro.faturas} value={rangeFatura.currentAte} onChange={(opt) => handleRangeChange('fatura', 'ate', opt)} placeholder="Até" styles={selectStyles} isClearable /></div>
                 </div>
               )}
             </div>
 
             {/* BLOCO: ELEMENTO PEP */}
-            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', margin: 0 }}>Elemento PEP / WBS</label>
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  <button type="button" onClick={() => alternarModo('pep', 'especifico')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoPep === 'especifico' ? '#ecfdf5' : 'white', borderColor: modoPep === 'especifico' ? '#10b981' : '#d1d5db', color: modoPep === 'especifico' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoPep === 'especifico' ? 'bold' : 'normal' }}>Específicos</button>
-                  <button type="button" onClick={() => alternarModo('pep', 'lote')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoPep === 'lote' ? '#ecfdf5' : 'white', borderColor: modoPep === 'lote' ? '#10b981' : '#d1d5db', color: modoPep === 'lote' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoPep === 'lote' ? 'bold' : 'normal' }}>Intervalo</button>
+            <div className="filtro-bloco">
+              <div className="filtro-bloco-header">
+                <label className="filtro-label">Elemento PEP</label>
+                <div className="filtro-btn-group">
+                  <button type="button" onClick={() => alternarModo('pep', 'especifico')} className={`filtro-btn-modo ${modoPep === 'especifico' ? 'ativo' : ''}`}>Específicos</button>
+                  <button type="button" onClick={() => alternarModo('pep', 'lote')} className={`filtro-btn-modo ${modoPep === 'lote' ? 'ativo' : ''}`}>Intervalo</button>
                 </div>
               </div>
               {modoPep === 'especifico' ? (
                 <Select isMulti options={opcoesFiltro.peps} value={getMultiValue(filtros.elemento_pep)} onChange={(opts) => handleMultiSelectChange('elemento_pep', opts)} placeholder="Selecionar PEPs..." styles={selectStyles} />
               ) : (
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <div style={{ flex: 1 }}><Select options={opcoesFiltro.peps} value={rangePep.currentDe} onChange={(opt) => handleRangeChange('elemento_pep', 'de', opt)} placeholder="De" styles={selectStyles} isClearable /></div>
-                  <span style={{ color: '#6b7280', fontSize: '0.8rem', fontWeight: 'bold' }}>até</span>
-                  <div style={{ flex: 1 }}><Select options={opcoesFiltro.peps} value={rangePep.currentAte} onChange={(opt) => handleRangeChange('elemento_pep', 'ate', opt)} placeholder="Até" styles={selectStyles} isClearable /></div>
+                <div className="filtro-range-container">
+                  <div className="filtro-range-item"><Select options={opcoesFiltro.peps} value={rangePep.currentDe} onChange={(opt) => handleRangeChange('elemento_pep', 'de', opt)} placeholder="De" styles={selectStyles} isClearable /></div>
+                  <span className="filtro-range-sep">até</span>
+                  <div className="filtro-range-item"><Select options={opcoesFiltro.peps} value={rangePep.currentAte} onChange={(opt) => handleRangeChange('elemento_pep', 'ate', opt)} placeholder="Até" styles={selectStyles} isClearable /></div>
                 </div>
               )}
             </div>
 
             {/* BLOCO: DATA MAPEAMENTO */}
-            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', margin: 0 }}>Data Mapeamento</label>
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  <button type="button" onClick={() => alternarModo('data_map', 'especifico')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataMap === 'especifico' ? '#ecfdf5' : 'white', borderColor: modoDataMap === 'especifico' ? '#10b981' : '#d1d5db', color: modoDataMap === 'especifico' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataMap === 'especifico' ? 'bold' : 'normal' }}>Específicos</button>
-                  <button type="button" onClick={() => alternarModo('data_map', 'lote')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataMap === 'lote' ? '#ecfdf5' : 'white', borderColor: modoDataMap === 'lote' ? '#10b981' : '#d1d5db', color: modoDataMap === 'lote' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataMap === 'lote' ? 'bold' : 'normal' }}>Intervalo</button>
+            <div className="filtro-bloco">
+               <div className="filtro-bloco-header">
+                <label className="filtro-label">Data Mapeamento</label>
+                <div className="filtro-btn-group">
+                  <button type="button" onClick={() => alternarModo('data_map', 'especifico')} className={`filtro-btn-modo ${modoDataMap === 'especifico' ? 'ativo' : ''}`}>Específicos</button>
+                  <button type="button" onClick={() => alternarModo('data_map', 'lote')} className={`filtro-btn-modo ${modoDataMap === 'lote' ? 'ativo' : ''}`}>Intervalo</button>
                 </div>
                </div>
                {modoDataMap === 'especifico' ? (
                  <Select isMulti options={opcoesFiltro.datasMap} value={getMultiValueData(filtros.data_map_especifica)} onChange={(opts) => handleMultiSelectChange('data_map_especifica', opts)} placeholder="Selecionar dias..." styles={selectStyles} noOptionsMessage={() => "Nenhuma data"} />
                ) : (
-                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <div style={{ flex: 1 }}><input type="date" name="data_map_inicio" value={filtros.data_map_inicio || ''} onChange={onFiltroChange} style={inputStyle} /></div>
-                    <span style={{ color: '#6b7280', fontSize: '0.8rem', fontWeight: 'bold' }}>a</span>
-                    <div style={{ flex: 1 }}><input type="date" name="data_map_fim" value={filtros.data_map_fim || ''} onChange={onFiltroChange} style={inputStyle} /></div>
+                 <div className="filtro-range-container">
+                    <div className="filtro-range-item"><input type="date" name="data_map_inicio" value={filtros.data_map_inicio || ''} onChange={onFiltroChange} className="filtro-input" /></div>
+                    <span className="filtro-range-sep">a</span>
+                    <div className="filtro-range-item"><input type="date" name="data_map_fim" value={filtros.data_map_fim || ''} onChange={onFiltroChange} className="filtro-input" /></div>
                  </div>
                )}
             </div>
 
             {/* BLOCO: DATA EMISSÃO */}
-            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', margin: 0 }}>Data Emissão</label>
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  <button type="button" onClick={() => alternarModo('data_emi', 'especifico')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataEmi === 'especifico' ? '#ecfdf5' : 'white', borderColor: modoDataEmi === 'especifico' ? '#10b981' : '#d1d5db', color: modoDataEmi === 'especifico' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataEmi === 'especifico' ? 'bold' : 'normal' }}>Específicos</button>
-                  <button type="button" onClick={() => alternarModo('data_emi', 'lote')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataEmi === 'lote' ? '#ecfdf5' : 'white', borderColor: modoDataEmi === 'lote' ? '#10b981' : '#d1d5db', color: modoDataEmi === 'lote' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataEmi === 'lote' ? 'bold' : 'normal' }}>Intervalo</button>
+            <div className="filtro-bloco">
+               <div className="filtro-bloco-header">
+                <label className="filtro-label">Data Emissão</label>
+                <div className="filtro-btn-group">
+                  <button type="button" onClick={() => alternarModo('data_emi', 'especifico')} className={`filtro-btn-modo ${modoDataEmi === 'especifico' ? 'ativo' : ''}`}>Específicos</button>
+                  <button type="button" onClick={() => alternarModo('data_emi', 'lote')} className={`filtro-btn-modo ${modoDataEmi === 'lote' ? 'ativo' : ''}`}>Intervalo</button>
                 </div>
                </div>
                {modoDataEmi === 'especifico' ? (
                  <Select isMulti options={opcoesFiltro.datasEmi} value={getMultiValueData(filtros.data_emi_especifica)} onChange={(opts) => handleMultiSelectChange('data_emi_especifica', opts)} placeholder="Selecionar dias..." styles={selectStyles} noOptionsMessage={() => "Nenhuma data"} />
                ) : (
-                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <div style={{ flex: 1 }}><input type="date" name="data_emissao_inicio" value={filtros.data_emissao_inicio || ''} onChange={onFiltroChange} style={inputStyle} /></div>
-                    <span style={{ color: '#6b7280', fontSize: '0.8rem', fontWeight: 'bold' }}>a</span>
-                    <div style={{ flex: 1 }}><input type="date" name="data_emissao_fim" value={filtros.data_emissao_fim || ''} onChange={onFiltroChange} style={inputStyle} /></div>
+                 <div className="filtro-range-container">
+                    <div className="filtro-range-item"><input type="date" name="data_emissao_inicio" value={filtros.data_emissao_inicio || ''} onChange={onFiltroChange} className="filtro-input" /></div>
+                    <span className="filtro-range-sep">a</span>
+                    <div className="filtro-range-item"><input type="date" name="data_emissao_fim" value={filtros.data_emissao_fim || ''} onChange={onFiltroChange} className="filtro-input" /></div>
                  </div>
                )}
             </div>
 
             {/* BLOCO: DATA VENCIMENTO */}
-            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', margin: 0 }}>Data Vencimento</label>
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  <button type="button" onClick={() => alternarModo('data_venc', 'especifico')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataVenc === 'especifico' ? '#ecfdf5' : 'white', borderColor: modoDataVenc === 'especifico' ? '#10b981' : '#d1d5db', color: modoDataVenc === 'especifico' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataVenc === 'especifico' ? 'bold' : 'normal' }}>Específicos</button>
-                  <button type="button" onClick={() => alternarModo('data_venc', 'lote')} style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem', borderRadius: '0.25rem', border: '1px solid', backgroundColor: modoDataVenc === 'lote' ? '#ecfdf5' : 'white', borderColor: modoDataVenc === 'lote' ? '#10b981' : '#d1d5db', color: modoDataVenc === 'lote' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: modoDataVenc === 'lote' ? 'bold' : 'normal' }}>Intervalo</button>
+            <div className="filtro-bloco">
+               <div className="filtro-bloco-header">
+                <label className="filtro-label">Data Vencimento</label>
+                <div className="filtro-btn-group">
+                  <button type="button" onClick={() => alternarModo('data_venc', 'especifico')} className={`filtro-btn-modo ${modoDataVenc === 'especifico' ? 'ativo' : ''}`}>Específicos</button>
+                  <button type="button" onClick={() => alternarModo('data_venc', 'lote')} className={`filtro-btn-modo ${modoDataVenc === 'lote' ? 'ativo' : ''}`}>Intervalo</button>
                 </div>
                </div>
                {modoDataVenc === 'especifico' ? (
                  <Select isMulti options={opcoesFiltro.datasVenc} value={getMultiValueData(filtros.data_venc_especifica)} onChange={(opts) => handleMultiSelectChange('data_venc_especifica', opts)} placeholder="Selecionar dias..." styles={selectStyles} noOptionsMessage={() => "Nenhuma data"} />
                ) : (
-                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <div style={{ flex: 1 }}><input type="date" name="data_venc_inicio" value={filtros.data_venc_inicio || ''} onChange={onFiltroChange} style={inputStyle} /></div>
-                    <span style={{ color: '#6b7280', fontSize: '0.8rem', fontWeight: 'bold' }}>a</span>
-                    <div style={{ flex: 1 }}><input type="date" name="data_venc_fim" value={filtros.data_venc_fim || ''} onChange={onFiltroChange} style={inputStyle} /></div>
+                 <div className="filtro-range-container">
+                    <div className="filtro-range-item"><input type="date" name="data_venc_inicio" value={filtros.data_venc_inicio || ''} onChange={onFiltroChange} className="filtro-input" /></div>
+                    <span className="filtro-range-sep">a</span>
+                    <div className="filtro-range-item"><input type="date" name="data_venc_fim" value={filtros.data_venc_fim || ''} onChange={onFiltroChange} className="filtro-input" /></div>
                  </div>
                )}
             </div>
 
             {/* BLOCO: REGISTRADO SAP */}
-            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', display: 'block', marginBottom: '0.4rem' }}>Registrado SAP?</label>
-              <select name="registrado_sap" value={filtros.registrado_sap || ''} onChange={onFiltroChange} style={inputStyle}>
+            <div className="filtro-bloco">
+              <label className="filtro-label filtro-label-block">Registrado SAP?</label>
+              <select name="registrado_sap" value={filtros.registrado_sap || ''} onChange={onFiltroChange} className="filtro-input">
                 <option value="">Todos (Ignorar SAP)</option>
                 <option value="SIM">SIM (Já registrado)</option>
                 <option value="NÃO">NÃO (Pendente registro)</option>
               </select>
             </div>
 
-            {/* BLOCO: TIPO DOC E VALIDAÇÃO PEP */}
-            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', display: 'block', marginBottom: '0.4rem' }}>Tipo Documento</label>
+            {/* BLOCO: TIPO DOC */}
+            <div className="filtro-bloco">
+              <label className="filtro-label filtro-label-block">Tipo Documento</label>
               <Select isMulti options={opcoesFiltro.tiposDoc} value={getMultiValue(filtros.tipo_documento)} onChange={(opts) => handleMultiSelectChange('tipo_documento', opts)} placeholder="Ex: NFSe..." styles={selectStyles} />
             </div>
 
-            <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4b5563', display: 'block', marginBottom: '0.4rem' }}>Validação PEP</label>
+            {/* BLOCO: VALIDAÇÃO PEP */}
+            <div className="filtro-bloco">
+              <label className="filtro-label filtro-label-block">Validação PEP</label>
               <Select isMulti options={opcoesFiltro.validacoes} value={getMultiValue(filtros.validacao_pep)} onChange={(opts) => handleMultiSelectChange('validacao_pep', opts)} placeholder="Ex: OK..." styles={selectStyles} />
             </div>
 
@@ -269,15 +269,15 @@ export default function FiltroFat({ atms, filtros, onFiltroChange, onLimpar, abe
 
         </div>
 
-        <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb', padding: '1rem 1.5rem' }}>
+        <div className="filtro-modal-footer">
           <div>
             {temFiltroAtivo ? (
-              <button onClick={() => { onLimpar(); onClose(); }} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '0.375rem', border: '1px solid #fca5a5', backgroundColor: '#fee2e2', color: '#ef4444', fontWeight: 'bold', cursor: 'pointer' }}>
+              <button onClick={() => { onLimpar(); onClose(); }} className="filtro-btn-limpar">
                 <XCircle size={16} /> Limpar Filtros
               </button>
             ) : <div />}
           </div>
-          <button onClick={onClose} style={{ backgroundColor: '#059669', color: 'white', border: 'none', padding: '0.5rem 1.5rem', borderRadius: '0.375rem', fontWeight: 'bold', cursor: 'pointer' }}>
+          <button onClick={onClose} className="filtro-btn-resultados">
             Ver Resultados
           </button>
         </div>

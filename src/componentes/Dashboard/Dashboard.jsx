@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import FiltroOP from '../FiltroOP/FiltroOP'; 
 import FiltroFat from '../FiltroFat/FiltroFat';
 import BtnExcel from '../BtnExcel/BtnExcel';
-import './Dashboard.css'; // <-- IMPORTAÇÃO DO CSS
+import './Dashboard.css';
 
 const TableList = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="3" x2="21" y1="15" y2="15"/><line x1="9" x2="9" y1="9" y2="21"/></svg>;
 const FolderOpen = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>;
@@ -88,6 +88,7 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
   const isDataNoIntervalo = (dataBancoStr, dataFiltroInicio, dataFiltroFim) => {
     if (!dataFiltroInicio && !dataFiltroFim) return true;
     if (!dataBancoStr) return false;
+    
     const dBanco = new Date(dataBancoStr.split('T')[0]);
     if (dataFiltroInicio && dBanco < new Date(dataFiltroInicio)) return false;
     if (dataFiltroFim && dBanco > new Date(dataFiltroFim)) return false;
@@ -203,6 +204,10 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
   return (
     <section className="fade-in section-dashboard">
       <div className="dashboard-header">
+        <h3 className="dashboard-title">
+          <TableList size={28} className="text-primary" /> 
+          Painel de Controle <span className="dashboard-title-sub">(Logística e Faturamento)</span>
+        </h3>
         <BtnExcel atmsFiltrados={atmsFiltrados} />
       </div>
 
@@ -229,7 +234,8 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
                     </button>
                   </div>
                 </th>
-                <th colSpan="8" className="th-group-fat">
+                {/* O colSpan foi atualizado para 9 para cobrir a nova coluna de data separada */}
+                <th colSpan="9" className="th-group-fat">
                   <div className="th-group-content">
                     <span className="th-group-title">FATURAMENTO / SAP</span>
                     <button onClick={() => setAbertoFiltroFat(true)} className="btn-filter-custom btn-filter-fat">
@@ -242,16 +248,17 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
               </tr>
               <tr className="tr-subheader">
                 <th>ID ATM</th><th>WBS</th><th>Solicitante</th><th>Pedido</th><th>NF</th><th>Rota</th><th>T. Frete</th><th>Veículo</th><th style={{ borderRight: '2px solid #e2e8f0' }}>Status</th>
-                <th>Tipo Doc.</th><th>Data Map.</th><th>Fatura</th><th>Valor (R$)</th><th>Emissão/Venc.</th><th>Elem. PEP</th><th>Valid. PEP</th><th>SAP</th>
+                {/* Colunas de datas de emissão e vencimento separadas */}
+                <th>Tipo Doc.</th><th>Data Map.</th><th>Fatura</th><th>Valor (R$)</th><th>Data Emissão</th><th>Vencimento</th><th>Elem. PEP</th><th>Valid. PEP</th><th>SAP</th>
                 <th className="th-sticky-action">Ações</th>
               </tr>
             </thead>
             
             <tbody>
               {carregando ? (
-                <tr><td colSpan="18" className="td-empty-state">Carregando dados mestre...</td></tr>
+                <tr><td colSpan="19" className="td-empty-state">Carregando dados mestre...</td></tr>
               ) : atmsExibidos.length === 0 ? (
-                <tr><td colSpan="18" className="td-empty-state">Nenhum resultado encontrado com os filtros atuais.</td></tr>
+                <tr><td colSpan="19" className="td-empty-state">Nenhum resultado encontrado com os filtros atuais.</td></tr>
               ) : atmsExibidos.map((atm) => (
                 <tr key={atm.id} className="tr-data">
                   <td className="td-id">#{shortId(atm.id)}</td>
@@ -274,8 +281,11 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
                   <td className="td-valor">
                     {(atm.valor || atm.valor_nf) ? Number(atm.valor || atm.valor_nf).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}) : '-'}
                   </td>
+                  {/* Células de datas de emissão e vencimento separadas */}
                   <td className="td-dates">
-                    {formatarDataCurta(atm.data_emissao)}<br/>
+                    {formatarDataCurta(atm.data_emissao)}
+                  </td>
+                  <td className="td-dates">
                     <strong className="td-vencimento">{formatarDataCurta(atm.vencimento)}</strong>
                   </td>
                   <td><small>{atm.elemento_pep_cc_wbs || atm.wbs || '-'}</small></td>

@@ -1,54 +1,85 @@
 // src/componentes/BtnPdf/BtnPdf.jsx
-import React, { useRef, useState } from 'react';
-import html2pdf from 'html2pdf.js';
-import ModeloPDF from '../ModeloPDF/ModeloPDF';
+import React, { useState } from 'react';
 
-const FileText = ({ size = 24 }) => (
+// Ícone do Documento
+const FileText = ({ size = 18 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/>
+    <line x1="16" y1="17" x2="8" y2="17"/>
+    <polyline points="10 9 9 9 8 9"/>
   </svg>
 );
 
 export default function BtnPdf({ atm }) {
-  const pdfRef = useRef();
-  const [gerando, setGerando] = useState(false);
+  const [gerandoPdf, setGerandoPdf] = useState(false);
 
-  if (!atm) return null;
+  // Função auxiliar para encurtar o ID caso o ATM ainda não tenha número
+  const shortId = (id) => id ? id.substring(0, 8).toUpperCase() : 'N/A';
 
-  const gerarPDF = async () => {
-    setGerando(true);
-    const element = pdfRef.current;
+  // LÓGICA REAL DO BOTÃO DE PDF/WORD
+  const handleGerarPdf = async () => {
+    setGerandoPdf(true);
     
-    // Nome do ficheiro mais inteligente (usa o numero_atm se existir)
-    const idNome = atm.numero_atm ? String(atm.numero_atm) : atm.id?.substring(0, 8).toUpperCase();
-
-    const opt = {
-      margin:       10, 
-      filename:     `ATM_${idNome}_Autorizacao.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false }, 
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
     try {
-      // Como o elemento não está em display:none, o html2pdf consegue capturá-lo diretamente!
-      await html2pdf().from(element).set(opt).save();
+      // Faz a chamada ao seu backend (Node.js) enviando os dados do ATM
+      const resposta = await fetch('http://localhost:3001/api/gerar-atm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(atm), 
+      });
+
+      if (!resposta.ok) {
+        throw new Error('Falha ao gerar o documento no servidor.');
+      }
+
+      // Recebe o arquivo pronto e força o download no navegador
+      const blob = await resposta.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Nome do arquivo que será baixado
+      link.setAttribute('download', `Autorizacao_ATM_${atm.numero_atm || shortId(atm.id)}.docx`);
+      
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+
     } catch (erro) {
-      console.error("Erro ao gerar PDF:", erro);
-      alert("Houve um erro ao gerar o PDF.");
+      console.error(erro);
+      alert("Erro ao tentar gerar o documento. O servidor Node.js está a rodar e a rota /api/gerar-atm foi criada?");
     } finally {
-      setGerando(false);
+      setGerandoPdf(false);
     }
   };
 
   return (
-    <>
-      <button className="btn-danger" onClick={gerarPDF} disabled={gerando} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <FileText size={18}/> {gerando ? 'A Gerar Documento...' : 'Gerar PDF Oficial'}
-      </button>
-
-      {/* Renderiza o modelo escondido na tela */}
-      <ModeloPDF ref={pdfRef} atm={atm} />
-    </>
+    <button 
+      onClick={handleGerarPdf}
+      disabled={gerandoPdf}
+      style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '0.5rem', 
+        padding: '0.6rem 1.25rem', 
+        borderRadius: '0.5rem', 
+        border: '1px solid #fca5a5', 
+        cursor: gerandoPdf ? 'not-allowed' : 'pointer', 
+        fontWeight: 'bold', 
+        backgroundColor: '#fee2e2', 
+        color: '#ef4444',
+        transition: 'background-color 0.2s',
+        opacity: gerandoPdf ? 0.7 : 1
+      }}
+      onMouseOver={(e) => { if(!gerandoPdf) e.currentTarget.style.backgroundColor = '#fecaca' }} 
+      onMouseOut={(e) => { if(!gerandoPdf) e.currentTarget.style.backgroundColor = '#fee2e2' }}
+    >
+      <FileText size={18} /> 
+      {gerandoPdf ? 'Gerando Documento...' : 'Gerar Autorização'}
+    </button>
   );
 }
