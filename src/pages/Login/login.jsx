@@ -1,4 +1,3 @@
-// src/pages/login/login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './login.css';
@@ -11,7 +10,6 @@ const Lock = ({ size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={s
 export default function Login() {
   const navigate = useNavigate(); 
   
-  // Estados para capturar os dados do formulário
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -23,41 +21,38 @@ export default function Login() {
     setErroValidacao('');
 
     try {
-      // Faz o pedido POST para o servidor
-      const response = await fetch('http://localhost:3001/api/login', {
+      // 1. Chamada para a nova rota de autenticação
+      const response = await fetch('http://localhost:3001/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, senha })
       });
 
-      // Validação para evitar erro caso o backend devolva HTML em vez de JSON
       const isJson = response.headers.get('content-type')?.includes('application/json');
       if (!isJson) {
-        setErroValidacao('Erro no servidor. Verifique se o backend está a rodar.');
+        setErroValidacao('Erro no servidor. Resposta inválida.');
         setIsLoading(false);
         return;
       }
 
-      // Extrai os dados que o Backend enviou (Incluindo o Token)
       const data = await response.json();
 
       if (response.ok) {
-        // 👇 A MÁGICA DA SEGURANÇA ACONTECE AQUI 👇
-        // Guarda a pulseira VIP (Token) e os dados do usuário no navegador
-        localStorage.setItem('token', data.token); // <--- CRUCIAL PARA AS ROTAS PRIVADAS
+        // 🟢 SALVANDO OS DOIS TOKENS NO LOCALSTORAGE 🟢
+        localStorage.setItem('accessToken', data.accessToken); 
+        localStorage.setItem('refreshToken', data.refreshToken);
+        
+        // Dados informativos do usuário
         localStorage.setItem('userName', data.nome);
         localStorage.setItem('userPerfil', data.perfil);
-        // 👆 ====================================== 👆
         
-        // Redireciona para o Dashboard Admin (que está na rota "/")
         navigate('/'); 
       } else {
-        // Se a senha estiver errada, mostra a mensagem vinda do backend
-        setErroValidacao(data.mensagem || 'E-mail ou palavra-passe incorretos.');
+        setErroValidacao(data.mensagem || 'E-mail ou senha incorretos.');
       }
     } catch (error) {
       console.error("Erro de conexão:", error);
-      setErroValidacao('Sem conexão com o servidor. Tente novamente mais tarde.');
+      setErroValidacao('Sem conexão com o servidor.');
     } finally {
       setIsLoading(false);
     }
@@ -74,8 +69,6 @@ export default function Login() {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group-container">
-            
-            {/* CAMPO DE E-MAIL */}
             <div className="form-group">
               <label className="form-label">E-mail Corporativo</label>
               <div className="input-wrapper">
@@ -91,7 +84,6 @@ export default function Login() {
               </div>
             </div>
             
-            {/* CAMPO DE SENHA */}
             <div className="form-group">
               <label className="form-label">Palavra-passe</label>
               <div className="input-wrapper">
@@ -108,7 +100,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* MENSAGEM DE ERRO */}
             {erroValidacao && (
               <div style={{ color: '#ef4444', fontSize: '0.85rem', textAlign: 'center', marginTop: '0.5rem', fontWeight: 'bold' }}>
                 {erroValidacao}
