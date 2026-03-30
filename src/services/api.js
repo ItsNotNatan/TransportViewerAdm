@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// 🟢 Captura a URL da API das variáveis de ambiente
+// Se estiver usando Vite: import.meta.env.VITE_API_URL
+// Se estiver usando Create React App: process.env.REACT_APP_API_URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
 const api = axios.create({
-  baseURL: 'http://localhost:3001/api'
+  baseURL: API_URL
 });
 
 // Interceptor para colocar o crachá (AccessToken) em toda requisição
@@ -13,33 +18,30 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor para renovar o token automaticamente se der erro 403 (Expirado)
+// Interceptor para renovar o token automaticamente
 api.interceptors.response.use(
   (response) => response, 
   async (error) => {
     const originalRequest = error.config;
 
-    // Se o erro for 403 e ainda não tentamos renovar...
     if (error.response?.status === 403 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         
-        // Pede um novo Access Token para o Back-end
-        const res = await axios.post('http://localhost:3001/api/auth/refresh', { 
+        // 🟢 IMPORTANTE: Usa a variável API_URL aqui também!
+        const res = await axios.post(`${API_URL}/auth/refresh`, { 
           refreshToken 
         });
 
         const novoAccessToken = res.data.accessToken;
 
-        // Salva o novo e tenta a requisição original de novo
         localStorage.setItem('accessToken', novoAccessToken);
         api.defaults.headers.common['Authorization'] = `Bearer ${novoAccessToken}`;
         
         return api(originalRequest); 
       } catch (refreshError) {
-        // Se o Refresh Token também falhar, desloga tudo
         localStorage.clear();
         window.location.href = '/login';
         return Promise.reject(refreshError);
