@@ -286,3 +286,63 @@
   font-weight: bold;
 }
 
+/* --- Botões de Filtro no Cabeçalho (Atualizado) --- */
+.btn-filter-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilo para Filtro de OPERAÇÃO */
+.btn-filter-header.op {
+  border: 1.5px solid #2563eb;
+  color: #2563eb;
+}
+
+.btn-filter-header.op:hover {
+  background-color: #2563eb;
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* Estilo para Filtro de FATURAMENTO */
+.btn-filter-header.fat {
+  border: 1.5px solid #059669;
+  color: #059669;
+}
+
+.btn-filter-header.fat:hover {
+  background-color: #059669;
+  color: white;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+}
+
+/* Efeito de clique */
+.btn-filter-header:active {
+  transform: translateY(1px);
+}
+
+/* Indicador de Filtro Ativo (Ponto Vermelho) */
+.filter-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(239, 68, 68, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}

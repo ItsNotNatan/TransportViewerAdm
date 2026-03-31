@@ -11,6 +11,14 @@ const ChevronLeft = ({ size = 18 }) => <svg xmlns="http://www.w3.org/2000/svg" w
 const ChevronRight = ({ size = 18 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>;
 const FilterIcon = ({ size = 16 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>;
 
+const temFiltroOpAtivo = () => {
+  return !!(filtros.id || filtros.solicitante || filtros.pedido || filtros.nf || filtros.status || filtros.transportadora);
+};
+
+const temFiltroFatAtivo = () => {
+  return !!(filtros.fatura || filtros.elemento_pep || filtros.registrado_sap || filtros.tipo_documento);
+};
+
 export default function Dashboard({ atms, carregando, onOpenAtm }) {
   const [filtros, setFiltros] = useState({ 
     id: '', solicitante: '', pedido: '', nf: '', data_inicio: '', data_fim: '', data_especifica: '', status: '', transportadora: '',
