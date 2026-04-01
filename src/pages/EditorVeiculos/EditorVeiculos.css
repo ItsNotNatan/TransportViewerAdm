@@ -1,0 +1,173 @@
+.editor-veiculos-page {
+  padding: 20px;
+  height: 100%;
+}
+
+.editor-container {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 20px;
+  height: calc(100vh - 120px);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Painéis Base */
+.veiculos-list-panel, .veiculo-form-panel {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.panel-header {
+  padding: 20px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+/* Lista de Itens */
+.list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.veiculo-card-item {
+  padding: 15px;
+  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.veiculo-card-item:hover {
+  border-color: #f97316;
+  background: #fffaf5;
+}
+
+.veiculo-card-item.active {
+  border-color: #f97316;
+  background: #fff7ed;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.1);
+}
+
+.v-info strong { display: block; font-size: 0.9rem; color: #1f2937; }
+.v-info span { font-size: 0.75rem; color: #6b7280; font-family: monospace; }
+
+/* Botões */
+.btn-icon-add {
+  background: #0f172a;
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-del-small {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.btn-del-small:hover { color: #ef4444; }
+
+/* Formulário */
+.form-edit-v {
+  padding: 30px;
+}
+
+.form-row-full { margin-bottom: 20px; }
+.form-grid-dimensions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4b5563;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+input:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1); }
+
+/* Card de Volume */
+.volume-preview-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.volume-preview-card span { display: block; font-size: 0.8rem; color: #166534; margin-bottom: 5px; }
+.volume-preview-card strong { font-size: 1.5rem; color: #15803d; }
+
+.form-actions-v {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  border-top: 1px solid #eee;
+  padding-top: 25px;
+}
+
+.btn-save-v {
+  background: #f97316;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  background: white;
+  border: 1px solid #d1d5db;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}

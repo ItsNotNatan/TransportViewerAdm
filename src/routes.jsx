@@ -6,20 +6,19 @@ import AdminProfile from './pages/AdminProfile/AdminProfile';
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import Layout from './componentes/layout/layout';
 
+// 🟢 NOVAS IMPORTAÇÕES
+import EditorVeiculos from './pages/EditorVeiculos/EditorVeiculos';
+
 // ======================================================
 // COMPONENTE DE PROTEÇÃO (SISTEMA DE DOIS TOKENS)
 // ======================================================
 const RotaPrivada = ({ children }) => {
-  // 🟢 AGORA: Verificamos o accessToken (o crachá de curta duração)
   const token = localStorage.getItem('accessToken'); 
   
   if (!token) {
-    // Se não tem nem o token básico, manda para o login
     return <Navigate to="/login" replace />;
   }
   
-  // Se tem token, o Layout é renderizado. 
-  // Se o token expirar durante o uso, o Axios renovará automaticamente.
   return children;
 };
 
@@ -36,12 +35,22 @@ export const router = createBrowserRouter([
     ), 
     children: [
       {
-        path: "", // Rota: /
+        path: "", // Rota: / (Dashboard Principal)
         element: <AdminDashboard /> 
       },
       {
         path: "perfil", // Rota: /perfil
         element: <AdminProfile /> 
+      },
+      // 🟢 ROTA DO SIMULADOR 3D
+      {
+        path: "simulador-veiculo", // Rota: /simulador-veiculo
+        element: <EditorVeiculos />
+      },
+      // 🟢 ROTA DE GESTÃO DE FROTA (CRUD)
+      {
+        path: "gestao-veiculos", // Rota: /gestao-veiculos
+        element: <EditorVeiculos />
       }
     ]
   },
