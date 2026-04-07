@@ -117,7 +117,7 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
                 <th>Solicitante</th>
                 <th>Pedido</th>
                 <th>NF</th>
-                <th className="col-highlight">Transporte</th>
+                <th className="col-highlight">Transportadora</th>
                 <th className="col-highlight">Vlr. Frete</th>
                 <th>Rota</th>
                 <th>T. Frete</th>
