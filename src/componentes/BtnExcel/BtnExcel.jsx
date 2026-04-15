@@ -2,6 +2,7 @@
 import React from 'react';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import logoComau from '../../assets/logo-comau.png';
 
 const DownloadIcon = ({ size = 20, className = "" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -30,6 +31,7 @@ export default function BtnExcel({ atmsFiltrados }) {
       
       worksheet.getCell('D2').value = 'Gestão de Fretes';
       worksheet.getCell('D2').font = { bold: true, size: 16 };
+      worksheet.getCell('A2').value = logoComau;
 
       // Configuração das Colunas
       worksheet.columns = [

@@ -80,13 +80,6 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
 
   return (
     <section className="fade-in section-dashboard">
-      <div className="dashboard-header">
-        <h3 className="dashboard-title">
-          <TableList size={28} className="text-primary" /> 
-          Painel de Controle <span className="dashboard-title-sub">(Logística e Faturamento)</span>
-        </h3>
-        <BtnExcel atmsFiltrados={atmsFiltrados} />
-      </div>
 
       <FiltroOP atms={atms} filtros={filtros} onFiltroChange={handleFiltroChange} onLimpar={limparFiltros} aberto={abertoFiltroOp} onClose={() => setAbertoFiltroOp(false)} />
       <FiltroFat atms={atms} filtros={filtros} onFiltroChange={handleFiltroChange} onLimpar={limparFiltros} aberto={abertoFiltroFat} onClose={() => setAbertoFiltroFat(false)} />
@@ -96,7 +89,6 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
           <table className="dashboard-table" ref={tableContentRef}>
             <thead className="sticky-thead">
               <tr>
-                {/* GRUPO OPERAÇÃO */}
                 <th colSpan="11" className="th-group-op">
                   <div className="th-group-content">
                     <span className="th-group-title">DADOS DA OPERAÇÃO</span>
@@ -204,6 +196,7 @@ export default function Dashboard({ atms, carregando, onOpenAtm }) {
             <div className="pagination-info">
               Mostrando <strong>{((paginaAtual - 1) * itensPorPagina) + 1}</strong> até <strong>{Math.min(paginaAtual * itensPorPagina, atmsFiltrados.length)}</strong> de <strong>{atmsFiltrados.length}</strong> registros
             </div>
+            <BtnExcel atmsFiltrados={atmsFiltrados} />
             <div className="pagination-controls">
               <button className="pagination-btn" onClick={() => setPaginaAtual(p => Math.max(p-1, 1))} disabled={paginaAtual === 1} aria-label="Página anterior"><ChevronLeft /> Anterior</button>
               <span className="pagination-page-text">{paginaAtual} / {totalPaginas}</span>
